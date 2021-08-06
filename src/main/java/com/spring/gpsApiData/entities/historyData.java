@@ -22,4 +22,5 @@ public class historyData {
     private String powerValue;
     private String direction;
     private String timeStamp;
+    private String gpsTime;
 }

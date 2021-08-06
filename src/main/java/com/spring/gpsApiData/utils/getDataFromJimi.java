@@ -21,7 +21,7 @@ public interface getDataFromJimi {
             String access_token = "";
             //first get the jimmy access token
             while (access_token == "") {
-                String url = "http://localhost:1000/token";
+                String url = "http://3.109.80.120/:1000/token";
                 URL obj = new URL(url);
                 HttpURLConnection httpURLConnection = (HttpURLConnection) obj.openConnection();
                 httpURLConnection.setRequestMethod("GET");
@@ -95,6 +95,7 @@ public interface getDataFromJimi {
             String res = sb.toString();
             System.out.println(res);
             JSONObject json_res = new JSONObject(res.toString());
+            if(Integer.parseInt(json_res.getString("code")) == 0){
             JSONArray jsonArray = json_res.getJSONArray("result");
             JSONObject json = (JSONObject) jsonArray.get(0);
 
@@ -105,6 +106,7 @@ public interface getDataFromJimi {
             String deviceName = json.getString("deviceName");
             String powerValue = json.getString("powerValue");
             String direction = json.getString("direction");
+            String gpsTime = json.getString("gpsTime");
             GpsDataModel gpsDataModel = new GpsDataModel();
             gpsDataModel.setImei(imei);
             gpsDataModel.setLat(lat);
@@ -113,9 +115,18 @@ public interface getDataFromJimi {
             gpsDataModel.setDeviceName(deviceName);
             gpsDataModel.setPowerValue(powerValue);
             gpsDataModel.setDirection(direction);
+            gpsDataModel.setGpsTime(gpsTime);
             System.out.println(gpsDataModel);
 
-            return gpsDataModel;
-        }catch (Exception e){ System.out.println("failed with exception: " + e); return null;}
+            return gpsDataModel;}
+            else {
+                Thread.sleep(30 * 1000);
+                return getGpsApiDataUsingImei(imeis);
+            }
+        }catch (Exception e){
+            System.out.println("failed with exception: " + e);
+        //token wrong or some api error
+            Thread.sleep(30 * 1000);
+        return getGpsApiDataUsingImei(imeis);}
     }
 }
