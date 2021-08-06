@@ -12,6 +12,7 @@ public class GpsDataModel {
     private String deviceName;
     private String powerValue;
     private String direction;
+    private String gpsTime;
 
 }
 

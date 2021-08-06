@@ -39,28 +39,35 @@ class MyThread extends Thread {
                         historyData.setPowerValue(gpsData.getPowerValue());
                         historyData.setSpeed(gpsData.getSpeed());
                         historyData.setDirection(gpsData.getDirection());
+                        historyData.setGpsTime(gpsData.getGpsTime());
                         SimpleDateFormat gmtDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                         gmtDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
                         historyData.setTimeStamp(gmtDateFormat.format(new Date()));
                         System.out.println("historyData : " + historyData);
-                        dao.save(historyData);
                         if (Integer.parseInt(gpsData.getSpeed()) > 2) {
-                            Thread.sleep(1000);
+                            dao.save(historyData);
+                            //save data in every 2 seconds when device is moving
+                            Thread.sleep(2 * 1000);
                         } else {
-                            Thread.sleep(10 * 1000);
+                            Thread.sleep(30 * 1000);
                         }
                     }
-//                return null;
                 } catch (Exception e) {
                     e.printStackTrace();
-//                return "Unexpected Error";
-
                 }
             } else {
 //            return "Imei Empty";
             }
         } catch (Exception e) {
             System.out.println("failed with exception: " + e);
+            try {
+                Thread.sleep(30 * 1000);
+                MyThread myThread = new MyThread();
+                myThread.run(imei, dao);
+            } catch (InterruptedException interruptedException) {
+                interruptedException.printStackTrace();
+            }
+
         }
     }
 }
