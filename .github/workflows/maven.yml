@@ -1,0 +1,33 @@
+# This workflow will build a Java project with Maven
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Java CI with Maven
+
+on:
+  push:
+    branches: [ dev ]
+defaults:
+ run:
+  working-directory: ./
+jobs:
+  build:
+
+    runs-on: ['self-hosted', 'Linux', 'X64']
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
+        distribution: 'adopt'
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+    - run: cd ~/actions-runner/deploy/gpsApi/gpsApi
+    - run: sudo docker container stop gpsApiContainer || true
+    - run: sudo docker container start gpsPostgres || true
+    - run: sudo docker container prune -f
+    - run: sudo docker image rm gps || true
+    - run: sudo docker build -t gps .
+    - run: sudo docker run --name gpsPostgres -e POSTGRES_ROOT_PASSWORD=postgres -e POSTGRES_DATABASE=postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -d postgres:alpine 
+    - run: sudo docker run --name gpsApiContainer -p 3000:3000 --link gpsPostgres:postgres gps | echo "success"
