@@ -46,10 +46,10 @@ class MyThread extends Thread {
                         System.out.println("historyData : " + historyData);
                         if (Integer.parseInt(gpsData.getSpeed()) > 2) {
                             dao.save(historyData);
-                            //save data in every 2 seconds when device is moving
-                            Thread.sleep(2 * 1000);
+                            //save data in every 5 seconds when device is moving
+                            Thread.sleep(5 * 1000);
                         } else {
-                            Thread.sleep(30 * 1000);
+                            Thread.sleep(600 * 1000);
                         }
                     }
                 } catch (Exception e) {
@@ -61,7 +61,7 @@ class MyThread extends Thread {
         } catch (Exception e) {
             System.out.println("failed with exception: " + e);
             try {
-                Thread.sleep(30 * 1000);
+                Thread.sleep(600 * 1000);
                 MyThread myThread = new MyThread();
                 myThread.run(imei, dao);
             } catch (InterruptedException interruptedException) {
