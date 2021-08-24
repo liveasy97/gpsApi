@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import com.spring.gpsApiData.entities.historyData;
-import com.spring.gpsApiData.model.GpsDataModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +16,7 @@ public class Controller {
 	private gpsDataService gpsdataService;
 	
 	@GetMapping("/locationbyimei/{imei}")
-	private GpsDataModel getGpsData(@PathVariable String imei) throws Exception {
+	private List<historyData> getGpsData(@PathVariable String imei) throws Exception {
 		return gpsdataService.getgpsData(imei);
 	}
 	@GetMapping("/locationbyimei")

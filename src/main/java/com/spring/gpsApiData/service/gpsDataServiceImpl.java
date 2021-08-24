@@ -1,25 +1,15 @@
 package com.spring.gpsApiData.service;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Stream;
 
 import com.spring.gpsApiData.entities.historyData;
-import com.spring.gpsApiData.model.HistoryDataModel;
 import com.spring.gpsApiData.utils.addNewImei;
-import com.spring.gpsApiData.utils.getDataFromJimi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.spring.gpsApiData.dao.historyDataDao;
 import com.spring.gpsApiData.entities.gpsData;
-import org.json.*;
-import com.spring.gpsApiData.model.GpsDataModel;
 
 @Service
 public class gpsDataServiceImpl implements gpsDataService {
@@ -28,9 +18,9 @@ public class gpsDataServiceImpl implements gpsDataService {
     private historyDataDao dao;
 
     @Override
-    public GpsDataModel getgpsData(String imei) throws Exception {
+    public List<historyData> getgpsData(String imei) throws Exception {
 
-        return getDataFromJimi.getGpsApiDataUsingImei(imei);
+        return dao.findByImei(imei);
     }
 
     @Override
