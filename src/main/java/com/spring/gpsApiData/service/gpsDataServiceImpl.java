@@ -59,7 +59,8 @@ public class gpsDataServiceImpl implements gpsDataService {
 
     @Override
     public String saveHistoryData(historyData data) {
-        dao.save(data);
+        data.setId(UUID.randomUUID());
+	    dao.save(data);
         return "done";
     }
 
