@@ -21,7 +21,7 @@ public interface getDataFromJimi {
             String access_token = "";
             //first get the jimmy access token
             while (access_token == "") {
-                String url = "http://13.233.83.152:1000/token";
+                String url = "http://3.109.80.120:1000/token";
                 URL obj = new URL(url);
                 HttpURLConnection httpURLConnection = (HttpURLConnection) obj.openConnection();
                 httpURLConnection.setRequestMethod("GET");
