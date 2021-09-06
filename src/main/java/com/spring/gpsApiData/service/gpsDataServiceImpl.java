@@ -19,8 +19,11 @@ public class gpsDataServiceImpl implements gpsDataService {
 
     @Override
     public List<historyData> getgpsData(String imei) throws Exception {
-
-        return dao.findByImei(imei);
+        List<historyData> dataList = dao.findByImei(imei);
+        List<historyData> result = new ArrayList<>(Collections.emptyList());
+        historyData lastEntry = dataList.get(dataList.size()-1);
+        result.add(lastEntry);
+        return result;
     }
 
     @Override
