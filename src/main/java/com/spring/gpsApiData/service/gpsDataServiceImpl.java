@@ -21,27 +21,35 @@ public class gpsDataServiceImpl implements gpsDataService {
     public List<historyData> getgpsData(String imei) throws Exception {
         List<historyData> dataList = dao.findByImei(imei);
         List<historyData> result = new ArrayList<>(Collections.emptyList());
-        historyData lastEntry = dataList.get(dataList.size()-1);
+        historyData lastEntry = dataList.get(dataList.size() - 1);
         result.add(lastEntry);
         return result;
     }
 
     @Override
     public String savegpsData(gpsData data) {
-//        gpsData newData = new gpsData();
-//        newData.setImei(data.getImei());
-//        newData.setLatitude(data.getLatitude());
-//        newData.setLongitude(data.getLongitude());
-//        newData.setSpeed(data.getSpeed());
-//        newData.setDeviceName(data.getDeviceName());
-//        newData.setPowerValue(data.getPowerValue());
-//        dao.save(newData);
-        return "done";
+
+        return data.toString();
     }
 
     @Override
-    public Stream<historyData> getAllHistoryData() {
-        return dao.findAll().stream();
+    public List<historyData> getHistoryData(String imei, String startTime, String endTime) {
+        if(imei != null){
+        List<historyData> list = new ArrayList<>(Collections.emptyList());
+        List<historyData> historyDataList = dao.findByImei(imei);
+        for (int i = 0; i < historyDataList.toArray().length; i++) {
+            if (historyDataList.get(i).getTimeStamp() != null) {
+                if (Integer.parseInt(startTime.substring(0, 8)) <= Integer.parseInt(historyDataList.get(i).getTimeStamp().substring(0, 8)) && Integer.parseInt(startTime.substring(9, 15)) <= Integer.parseInt(historyDataList.get(i).getTimeStamp().substring(9, 15))) {
+                    if (Integer.parseInt(endTime.substring(0, 8)) >= Integer.parseInt(historyDataList.get(i).getTimeStamp().substring(0, 8)) && Integer.parseInt(endTime.substring(9, 15)) >= Integer.parseInt(historyDataList.get(i).getTimeStamp().substring(9, 15))) {
+                        list.add(historyDataList.get(i));
+                    }
+                }
+            }
+        }
+        return list;}
+        else {
+            return dao.findAll();
+        }
     }
 
     @Override
@@ -53,7 +61,7 @@ public class gpsDataServiceImpl implements gpsDataService {
     @Override
     public String saveHistoryData(historyData data) {
         data.setId(UUID.randomUUID());
-	    dao.save(data);
+        dao.save(data);
         return "done";
     }
 
