@@ -12,7 +12,7 @@ public interface gpsDataService {
 
 	public List<historyData> getgpsData(String imei) throws Exception;
 	public String savegpsData(gpsData data);
-	public Stream<historyData> getAllHistoryData();
+	public List<historyData> getHistoryData(String imei, String startTime, String endTime);
 	public String addImei(String imei);
 	public String saveHistoryData(historyData data);
 }

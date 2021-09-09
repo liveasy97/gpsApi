@@ -5,6 +5,8 @@ import java.util.stream.Stream;
 
 import com.spring.gpsApiData.entities.historyData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.spring.gpsApiData.service.gpsDataService;
@@ -19,9 +21,13 @@ public class Controller {
 	private List<historyData> getGpsData(@PathVariable String imei) throws Exception {
 		return gpsdataService.getgpsData(imei);
 	}
+
 	@GetMapping("/locationbyimei")
-	private Stream<historyData> getAllHistoryData(){
-		return gpsdataService.getAllHistoryData();
+	public ResponseEntity<List<historyData>> getHistoryData(
+			@RequestParam(required = false) String startTime,
+			@RequestParam(required = false) String endTime,
+			@RequestParam(required = false) String imei){
+		return new ResponseEntity<>(gpsdataService.getHistoryData(imei, startTime, endTime) , HttpStatus.OK);
 	}
 
 //	@PostMapping("/locationbyimei")
