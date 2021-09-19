@@ -29,22 +29,21 @@ class MyThread extends Thread {
                 try {
                     Boolean shouldRun = true;
                     while (shouldRun) {
-                        GpsDataModel gpsData = getDataFromJimi.getGpsApiDataUsingImei(imei);
-                        historyData historyData = new historyData();
+                        historyData historyData = getDataFromJimi.getGpsApiDataUsingImei(imei);
                         historyData.setId(UUID.randomUUID());
-                        historyData.setDeviceName(gpsData.getDeviceName());
-                        historyData.setImei(imei);
-                        historyData.setLat(gpsData.getLat());
-                        historyData.setLng(gpsData.getLng());
-                        historyData.setPowerValue(gpsData.getPowerValue());
-                        historyData.setSpeed(gpsData.getSpeed());
-                        historyData.setDirection(gpsData.getDirection());
-                        historyData.setGpsTime(gpsData.getGpsTime());
+//                        historyData.setDeviceName(gpsData.getDeviceName());
+//                        historyData.setImei(imei);
+//                        historyData.setLat(gpsData.getLat());
+//                        historyData.setLng(gpsData.getLng());
+//                        historyData.setPowerValue(gpsData.getPowerValue());
+//                        historyData.setSpeed(gpsData.getSpeed());
+//                        historyData.setDirection(gpsData.getDirection());
+//                        historyData.setGpsTime(gpsData.getGpsTime());
                         SimpleDateFormat gmtDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                         gmtDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
                         historyData.setTimeStamp(gmtDateFormat.format(new Date()));
                         System.out.println("historyData : " + historyData);
-                        if (Integer.parseInt(gpsData.getSpeed()) > 2) {
+                        if (Integer.parseInt(historyData.getSpeed()) > 2) {
                             dao.save(historyData);
                             //save data in every 5 seconds when device is moving
                             Thread.sleep(5 * 1000);
