@@ -1,6 +1,6 @@
 package com.spring.gpsApiData.utils;
 
-import com.spring.gpsApiData.model.GpsDataModel;
+import com.spring.gpsApiData.entities.historyData;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.TimeZone;
 
 public interface getDataFromJimi {
-    public static GpsDataModel getGpsApiDataUsingImei(String imeis) throws Exception {
+    public static historyData getGpsApiDataUsingImei(String imeis) throws Exception {
         try{
             String access_token = "";
             //first get the jimmy access token
@@ -107,7 +107,7 @@ public interface getDataFromJimi {
             String powerValue = json.getString("powerValue");
             String direction = json.getString("direction");
             String gpsTime = json.getString("gpsTime");
-            GpsDataModel gpsDataModel = new GpsDataModel();
+            historyData gpsDataModel = new historyData();
             gpsDataModel.setImei(imei);
             gpsDataModel.setLat(lat);
             gpsDataModel.setLng(lng);

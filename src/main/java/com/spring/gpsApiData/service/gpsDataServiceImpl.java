@@ -5,6 +5,7 @@ import java.util.stream.Stream;
 
 import com.spring.gpsApiData.entities.historyData;
 import com.spring.gpsApiData.utils.addNewImei;
+import com.spring.gpsApiData.utils.getDataFromJimi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,35 +20,43 @@ public class gpsDataServiceImpl implements gpsDataService {
 
     @Override
     public List<historyData> getgpsData(String imei) throws Exception {
-        List<historyData> dataList = dao.findByImei(imei);
-        List<historyData> result = new ArrayList<>(Collections.emptyList());
-        historyData lastEntry = dataList.get(dataList.size() - 1);
-        result.add(lastEntry);
-        return result;
+        if (imei.contains("transporter") || imei.contains("shipper")) {
+            List<historyData> dataList = dao.findByImei(imei);
+            List<historyData> result = new ArrayList<>(Collections.emptyList());
+            historyData lastEntry = dataList.get(dataList.size() - 1);
+            result.add(lastEntry);
+            return result;
+        } else {
+            List<historyData> result = new ArrayList<>(Collections.emptyList());
+            historyData gpsData = getDataFromJimi.getGpsApiDataUsingImei(imei);
+            result.add(gpsData);
+//            gpsData.setId(UUID.randomUUID());
+//            dao.save(gpsData);
+            return result;
+        }
     }
 
     @Override
     public String savegpsData(gpsData data) {
-
         return data.toString();
     }
 
     @Override
     public List<historyData> getHistoryData(String imei, String startTime, String endTime) {
-        if(imei != null){
-        List<historyData> list = new ArrayList<>(Collections.emptyList());
-        List<historyData> historyDataList = dao.findByImei(imei);
-        for (int i = 0; i < historyDataList.toArray().length; i++) {
-            if (historyDataList.get(i).getTimeStamp() != null) {
-                if (Integer.parseInt(startTime.substring(0, 8)) <= Integer.parseInt(historyDataList.get(i).getTimeStamp().substring(0, 8)) && Integer.parseInt(startTime.substring(9, 15)) <= Integer.parseInt(historyDataList.get(i).getTimeStamp().substring(9, 15))) {
-                    if (Integer.parseInt(endTime.substring(0, 8)) >= Integer.parseInt(historyDataList.get(i).getTimeStamp().substring(0, 8)) && Integer.parseInt(endTime.substring(9, 15)) >= Integer.parseInt(historyDataList.get(i).getTimeStamp().substring(9, 15))) {
-                        list.add(historyDataList.get(i));
+        if (imei != null) {
+            List<historyData> list = new ArrayList<>(Collections.emptyList());
+            List<historyData> historyDataList = dao.findByImei(imei);
+            for (int i = 0; i < historyDataList.toArray().length; i++) {
+                if (historyDataList.get(i).getTimeStamp() != null) {
+                    if (Integer.parseInt(startTime.substring(0, 8)) <= Integer.parseInt(historyDataList.get(i).getTimeStamp().substring(0, 8)) && Integer.parseInt(startTime.substring(9, 15)) <= Integer.parseInt(historyDataList.get(i).getTimeStamp().substring(9, 15))) {
+                        if (Integer.parseInt(endTime.substring(0, 8)) >= Integer.parseInt(historyDataList.get(i).getTimeStamp().substring(0, 8)) && Integer.parseInt(endTime.substring(9, 15)) >= Integer.parseInt(historyDataList.get(i).getTimeStamp().substring(9, 15))) {
+                            list.add(historyDataList.get(i));
+                        }
                     }
                 }
             }
-        }
-        return list;}
-        else {
+            return list;
+        } else {
             return dao.findAll();
         }
     }
@@ -64,6 +73,4 @@ public class gpsDataServiceImpl implements gpsDataService {
         dao.save(data);
         return "done";
     }
-
-
 }
