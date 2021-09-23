@@ -59,6 +59,7 @@ class MyThread extends Thread {
 //            return "Imei Empty";
             }
         } catch (Exception e) {
+        	e.printStackTrace();
             System.out.println("failed with exception: " + e);
             try {
                 Thread.sleep(600 * 1000);
