@@ -9,7 +9,6 @@ import com.spring.gpsApiData.utils.addNewImei;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.spring.gpsApiData.utils.getDataFromJimi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,24 +31,16 @@ public class GpsDataServiceImpl implements GpsDataService {
 
     @Override
     public List<historyData> getgpsData(String imei) throws Exception {
-        if (imei.contains("transporter") || imei.contains("shipper")) {
-            List<historyData> dataList = dao.findByImei(imei);
-            List<historyData> result = new ArrayList<>(Collections.emptyList());
-            historyData lastEntry = dataList.get(dataList.size() - 1);
-            result.add(lastEntry);
-            return result;
-        } else {
-            List<historyData> result = new ArrayList<>(Collections.emptyList());
-            historyData gpsData = getDataFromJimi.getGpsApiDataUsingImei(imei);
-            result.add(gpsData);
-//            gpsData.setId(UUID.randomUUID());
-//            dao.save(gpsData);
-            return result;
-        }
+        List<historyData> dataList = dao.findByImei(imei);
+        List<historyData> result = new ArrayList<>(Collections.emptyList());
+        historyData lastEntry = dataList.get(dataList.size() - 1);
+        result.add(lastEntry);
+        return result;
     }
 
     @Override
     public String savegpsData(gpsData data) {
+
         return data.toString();
     }
 
@@ -85,4 +76,6 @@ public class GpsDataServiceImpl implements GpsDataService {
         dao.save(data);
         return "done";
     }
+
+
 }

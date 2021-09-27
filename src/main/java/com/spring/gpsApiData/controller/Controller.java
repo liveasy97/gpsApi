@@ -9,13 +9,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.spring.gpsApiData.service.gpsDataService;
+import com.spring.gpsApiData.service.GpsDataService;
 
 @RestController
 public class Controller {
 	
 	@Autowired
-	private gpsDataService gpsdataService;
+	private GpsDataService gpsdataService;
 	
 	@GetMapping("/locationbyimei/{imei}")
 	private List<historyData> getGpsData(@PathVariable String imei) throws Exception {
@@ -41,8 +41,18 @@ public class Controller {
 		gpsdataService.saveHistoryData(data);
 		return "done";
 	}
+
 	@PostMapping("/addimei")
-	private String addImei(@RequestBody String imei) {
-		return gpsdataService.addImei(imei);
+	private ResponseEntity<String> addImei(@RequestBody String imei) {
+		try {
+			
+			gpsdataService.addImei(imei);
+		}
+		catch(Exception e) {
+	
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+		
+		return new ResponseEntity<>("Added Imei Successfully", HttpStatus.OK);
 	}
 }
