@@ -1,6 +1,6 @@
 package com.spring.gpsApiData.utils;
 
-import com.spring.gpsApiData.model.GpsDataModel;
+import com.spring.gpsApiData.entities.historyData;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
