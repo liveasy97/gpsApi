@@ -47,7 +47,7 @@ public class GpsDataSchedulingTasks {
         	{
         		log.info("Tracking GpsData for Imei:" + data.getImei());
         		
-        		GpsDataModel gpsData = getDataFromJimi.getGpsApiDataUsingImei(data.getImei());
+        		historyData gpsData = getDataFromJimi.getGpsApiDataUsingImei(data.getImei());
                 historyData historyData = new historyData();
                 historyData.setId(UUID.randomUUID());
                 historyData.setDeviceName(gpsData.getDeviceName());
