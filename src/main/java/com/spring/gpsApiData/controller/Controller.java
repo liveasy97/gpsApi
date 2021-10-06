@@ -1,14 +1,11 @@
 package com.spring.gpsApiData.controller;
-
 import java.util.List;
 import java.util.stream.Stream;
-
 import com.spring.gpsApiData.entities.historyData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import com.spring.gpsApiData.service.GpsDataService;
 
 @RestController
