@@ -4,9 +4,12 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import com.spring.gpsApiData.entities.historyData;
+import com.spring.gpsApiData.model.DeviceTrackListModel;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
 
 import com.spring.gpsApiData.service.GpsDataService;
@@ -19,15 +22,22 @@ public class Controller {
 	
 	@GetMapping("/locationbyimei/{imei}")
 	private List<historyData> getGpsData(@PathVariable String imei) throws Exception {
-		return gpsdataService.getgpsData(imei);
+		return gpsdataService.getgpsDataWithoutSaving(imei);
 	}
-
+	
+	@ExceptionHandler(MissingServletRequestParameterException.class)
+	public ResponseEntity<String> handleMissingParams(MissingServletRequestParameterException ex) {
+	    String name = ex.getParameterName();
+	    System.out.println(name + " parameter is missing");
+	    return new ResponseEntity<>(name + " parameter is missing", HttpStatus.BAD_REQUEST);
+	}
 	@GetMapping("/locationbyimei")
-	public ResponseEntity<List<historyData>> getHistoryData(
+	public ResponseEntity<List<DeviceTrackListModel>> getHistoryData(
 			@RequestParam(required = false) String startTime,
 			@RequestParam(required = false) String endTime,
-			@RequestParam(required = false) String imei){
-		return new ResponseEntity<>(gpsdataService.getHistoryData(imei, startTime, endTime) , HttpStatus.OK);
+			@RequestParam(required = true) String imei) throws Exception {
+		
+			return new ResponseEntity<>(gpsdataService.getHistoryDataDirectFromJimi(imei, startTime, endTime) , HttpStatus.OK);
 	}
 
 //	@PostMapping("/locationbyimei")
