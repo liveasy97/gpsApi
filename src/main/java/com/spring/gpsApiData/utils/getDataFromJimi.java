@@ -6,6 +6,9 @@ import com.spring.gpsApiData.model.DeviceTrackListModel;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,6 +25,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import static java.util.Map.entry;
 
+@Component
 public class getDataFromJimi {
 	
 	private static Map<String, String> commonParams = Map.ofEntries(
@@ -36,12 +40,17 @@ public class getDataFromJimi {
 //		    entry("user_pwd_md5", "cc120882480fd847d5a092a2d9817e75")
 		);
 	
-	public static String getAccessTokenFromJimi() throws Exception
+	@Value("${ACCESS_TOKEN_URL}")
+	private  String accessTokenUrl;
+	
+	@Value("${JIMI_URL}")
+	private  String jimiUrl;
+	
+	public  String getAccessTokenFromJimi() throws Exception
 	{
 		String access_token = "";
         while (access_token == "") {
-            String url = "http://3.109.80.120:1000/token";
-            URL obj = new URL(url);
+            URL obj = new URL(accessTokenUrl);
             HttpURLConnection httpURLConnection = (HttpURLConnection) obj.openConnection();
             httpURLConnection.setRequestMethod("GET");
             int responseCode = httpURLConnection.getResponseCode();
@@ -69,7 +78,8 @@ public class getDataFromJimi {
 		return access_token;
 	}
 	
-	public static String getJsonResponse(Map<String,String> params,URL url_location) throws Exception
+	//by giving all requiredparameters(common+private), we are getting json response//
+	public  String getJsonResponse(Map<String,String> params,URL url_location) throws Exception
 	{
 		 StringBuilder postData = new StringBuilder();
 
@@ -100,7 +110,8 @@ public class getDataFromJimi {
 			return res;
 	}
 	
-	public static JSONArray convertJsonResponseToJsonArray(String res) throws Exception
+	// Converting Jsonresponse to JsonArray//
+	public  JSONArray convertJsonResponseToJsonArray(String res) throws Exception
 	{
 		JSONObject json_res = new JSONObject(res.toString());    
         String responseCode = json_res.getString("code");
@@ -114,7 +125,7 @@ public class getDataFromJimi {
         }
 	}
 	
-    public static historyData getGpsApiDataUsingImei(String imeis) throws Exception {
+    public  historyData getGpsApiDataUsingImei(String imeis) throws Exception {
     	
     	//first get the jimmy access token
     	String access_token = getAccessTokenFromJimi();
@@ -124,7 +135,7 @@ public class getDataFromJimi {
         //Current Date Time in GMT
         System.out.println("Current Date and Time in GMT time zone: " + gmtDateFormat.format(new Date()));
 
-        URL url_location = new URL("http://open.10000track.com/route/rest");
+        URL url_location = new URL(jimiUrl);
         Map<String, String> allRequiredParams = new HashMap<>();
         allRequiredParams.put("method", "jimi.device.location.get");
         allRequiredParams.put("timestamp", gmtDateFormat.format(new Date()));
@@ -152,7 +163,7 @@ public class getDataFromJimi {
 	        return gpsDataModel;
     }
     
-    public static List<DeviceTrackListModel> getGpsApiDataUsingImeiStartTimeEndTime(String imei,String startTime, String endTime) throws Exception {
+    public  List<DeviceTrackListModel> getGpsApiDataUsingImeiStartTimeEndTime(String imei,String startTime, String endTime) throws Exception {
 
     	//first get the jimmy access token
     	String access_token = getAccessTokenFromJimi();
@@ -162,7 +173,7 @@ public class getDataFromJimi {
         //Current Date Time in GMT
         System.out.println("Current Date and Time in GMT time zone: " + gmtDateFormat.format(new Date()));
 
-        URL url_location = new URL("http://open.10000track.com/route/rest");
+        URL url_location = new URL(jimiUrl);
         Map<String, String> allRequiredParams = new HashMap<>();
         allRequiredParams.put("method", "jimi.device.track.mileage");
         allRequiredParams.put("timestamp", gmtDateFormat.format(new Date()));

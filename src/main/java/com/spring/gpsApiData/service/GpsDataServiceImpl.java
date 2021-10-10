@@ -25,6 +25,9 @@ public class GpsDataServiceImpl implements GpsDataService {
     
     @Autowired
     private RegisteredImeiDataDao rdao;
+    
+    @Autowired
+    private getDataFromJimi getDataFromJimi;
 
     @Override
     public List<historyData> getgpsDataWithSaving(String imei) throws Exception {
