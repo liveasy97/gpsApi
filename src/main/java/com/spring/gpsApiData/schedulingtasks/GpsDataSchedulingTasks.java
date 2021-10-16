@@ -16,7 +16,6 @@ import com.spring.gpsApiData.dao.RegisteredImeiDataDao;
 import com.spring.gpsApiData.dao.historyDataDao;
 import com.spring.gpsApiData.entities.RegisteredImeiData;
 import com.spring.gpsApiData.entities.historyData;
-import com.spring.gpsApiData.model.GpsDataModel;
 import com.spring.gpsApiData.utils.getDataFromJimi;
 
 @Component
@@ -29,6 +28,9 @@ public class GpsDataSchedulingTasks {
 	
 	@Autowired
 	private historyDataDao historydatadao;
+	
+	 @Autowired
+     private getDataFromJimi getDataFromJimi;
 	
 	@Scheduled(fixedDelay = 10000)
     public void ImeiInfo() {
@@ -66,8 +68,6 @@ public class GpsDataSchedulingTasks {
                 
                 if (Integer.parseInt(gpsData.getSpeed()) > 2) {
                 	historydatadao.save(historyData);
-                    //save data in every 5 seconds when device is moving
-                    Thread.sleep(5 * 1000);
                 } else {
                     Thread.sleep(600 * 1000);
                 }
