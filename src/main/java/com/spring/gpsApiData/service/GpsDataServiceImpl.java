@@ -1,12 +1,8 @@
 package com.spring.gpsApiData.service;
 
 import java.util.*;
-import java.util.stream.Stream;
-
 import com.spring.gpsApiData.entities.historyData;
-import com.spring.gpsApiData.schedulingtasks.GpsDataSchedulingTasks;
-import com.spring.gpsApiData.utils.addNewImei;
-
+import com.spring.gpsApiData.model.DeviceTrackListModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.spring.gpsApiData.utils.getDataFromJimi;
@@ -29,9 +25,12 @@ public class GpsDataServiceImpl implements GpsDataService {
     
     @Autowired
     private RegisteredImeiDataDao rdao;
+    
+    @Autowired
+    private getDataFromJimi getDataFromJimi;
 
     @Override
-    public List<historyData> getgpsData(String imei) throws Exception {
+    public List<historyData> getgpsDataWithSaving(String imei) throws Exception {
         if (imei.contains("transporter") || imei.contains("shipper")) {
             List<historyData> dataList = dao.findByImei(imei);
             List<historyData> result = new ArrayList<>(Collections.emptyList());
@@ -47,6 +46,21 @@ public class GpsDataServiceImpl implements GpsDataService {
             return result;
         }
     }
+    
+    //fetching data directly from jimi//
+    @Override
+    public List<historyData> getgpsDataWithoutSaving(String imei) throws Exception {
+        
+    	historyData datafromjimi = getDataFromJimi.getGpsApiDataUsingImei(imei);
+
+    	List<historyData> result = new ArrayList<>(Collections.emptyList());
+    	if(datafromjimi !=null)
+    	{	
+    		result.add(datafromjimi);
+    	}
+    	return result;
+           
+    }
 
     @Override
     public String savegpsData(gpsData data) {
@@ -54,7 +68,7 @@ public class GpsDataServiceImpl implements GpsDataService {
     }
 
     @Override
-    public List<historyData> getHistoryData(String imei, String startTime, String endTime) {
+    public List<historyData> getHistoryDataWithSaving(String imei, String startTime, String endTime) {
         if(imei != null){
 	        List<historyData> historyDataList = dao.findByImeiBetweenTimeRange(imei, startTime, endTime);
 
@@ -63,6 +77,14 @@ public class GpsDataServiceImpl implements GpsDataService {
         else {
             return dao.findHistoryDataBetweenTimeRange(startTime,endTime);
         }
+    }
+    
+    // fetching data directly from  jimi //
+	@Override
+    public List<DeviceTrackListModel> getHistoryDataDirectFromJimi(String imei, String startTime, String endTime) throws Exception {
+		    		
+		List<DeviceTrackListModel> deviceTrackList = getDataFromJimi.getGpsApiDataUsingImeiStartTimeEndTime(imei,startTime,endTime);
+		return deviceTrackList; 	
     }
 
     @Override
