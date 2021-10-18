@@ -30,4 +30,4 @@ jobs:
     - run: sudo docker image rm gps || true
     - run: sudo docker build -t gps .
     - run:  sudo docker container start gpsPostgres || sudo docker run --name gpsPostgres -e POSTGRES_ROOT_PASSWORD=postgres -e POSTGRES_DATABASE=postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -d postgres:alpine 
-    - run: sudo docker run -d --env-file /home/ubuntu/test.env -p 3000:3000 --name gpsApiContainer gpsApi env --link gpsPostgres:postgres gps | echo "success"
+    - run: sudo docker run -d --env-file /home/ubuntu/test.env -p 3000:3000 --name gpsApiContainer --link gpsPostgres:postgres gps | echo "success"
