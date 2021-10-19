@@ -2,9 +2,13 @@ package com.spring.gpsApiData.controller;
 
 import java.util.List;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.spring.gpsApiData.entities.historyData;
 import com.spring.gpsApiData.model.DeviceTrackListModel;
+import com.spring.gpsApiData.model.IgnitionOffPostRequest;
+import com.spring.gpsApiData.model.RelaySendCommandResponseModel;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,6 +17,8 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
 
 import com.spring.gpsApiData.service.GpsDataService;
+
+import lombok.extern.java.Log;
 
 @RestController
 public class Controller {
@@ -64,5 +70,19 @@ public class Controller {
 		}
 		
 		return new ResponseEntity<>("Added Imei Successfully", HttpStatus.OK);
+	}
+	
+	@PostMapping("/ignitionoff")
+	private ResponseEntity<RelaySendCommandResponseModel> sendInstructionToDevice(@RequestBody IgnitionOffPostRequest ignitionOffPostRequest) throws Exception {
+				
+			RelaySendCommandResponseModel response = gpsdataService.commandToDevice(ignitionOffPostRequest);
+		   
+			if(response.getCode()==12005)
+			{
+				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+			}
+		    
+		    return new ResponseEntity<>(response, HttpStatus.OK);
+
 	}
 }

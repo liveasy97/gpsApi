@@ -3,6 +3,9 @@ package com.spring.gpsApiData.service;
 import java.util.*;
 import com.spring.gpsApiData.entities.historyData;
 import com.spring.gpsApiData.model.DeviceTrackListModel;
+import com.spring.gpsApiData.model.IgnitionOffPostRequest;
+import com.spring.gpsApiData.model.RelaySendCommandResponseModel;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.spring.gpsApiData.utils.getDataFromJimi;
@@ -107,4 +110,11 @@ public class GpsDataServiceImpl implements GpsDataService {
         dao.save(data);
         return "done";
     }
+
+	@Override
+	public RelaySendCommandResponseModel commandToDevice(IgnitionOffPostRequest ignitionOffPostRequest) throws Exception {
+		
+		RelaySendCommandResponseModel relayInfo = getDataFromJimi.getGpsApiDeviceRelayData(ignitionOffPostRequest);
+		return relayInfo; 
+	}
 }
