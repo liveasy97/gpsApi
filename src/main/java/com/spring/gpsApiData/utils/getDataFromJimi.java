@@ -1,7 +1,11 @@
 package com.spring.gpsApiData.utils;
 
 import com.spring.gpsApiData.entities.historyData;
+import com.spring.gpsApiData.model.CreateGeoFencePostRequest;
+import com.spring.gpsApiData.model.CreateGeoFenceResponse;
 import com.spring.gpsApiData.model.DeviceTrackListModel;
+import com.spring.gpsApiData.model.IgnitionOffPostRequest;
+import com.spring.gpsApiData.model.RelaySendCommandResponse;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -96,17 +100,30 @@ public class getDataFromJimi {
 	        conn.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
 	        conn.setDoOutput(true);
 	        conn.getOutputStream().write(postDataBytes);
-	        BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+	        System.out.println(postData);
+	        
+	        BufferedReader in = null;
+	        String res = null;
+	        
+	        if (conn.getResponseCode() == 200)
+	        {
+	        	in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+	        	
+	        } else {
+	        	in = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "UTF-8"));
+	        }
+	        
 	        StringBuilder sb = new StringBuilder();
 	        for (int c; (c = in.read()) >= 0; )
-	            sb.append((char) c);
-	        String res = sb.toString();
+	        	sb.append((char) c);
+	        res = sb.toString();
 	        System.out.println(res);
-	        if (conn.getResponseCode() == 400) {
-	        	JSONObject myResponse = new JSONObject(res);
-	        	String message = myResponse.getString("message");
-	        	throw new Exception(message);
-	        }
+	        
+//	        if (conn.getResponseCode() == 400) {
+//	        	JSONObject myResponse = new JSONObject(res);
+//	        	String message = myResponse.getString("message");
+//	        	throw new Exception(message);
+//	        }
 			return res;
 	}
 	
@@ -140,7 +157,7 @@ public class getDataFromJimi {
         allRequiredParams.put("method", "jimi.device.location.get");
         allRequiredParams.put("timestamp", gmtDateFormat.format(new Date()));
         allRequiredParams.put("access_token", access_token);
-        allRequiredParams.put("imeis", imeis);      
+        allRequiredParams.put("imeis", imeis);  
         allRequiredParams.putAll(commonParams);       
         String res = getJsonResponse(allRequiredParams,url_location);
         JSONArray jsonArray = convertJsonResponseToJsonArray(res);
@@ -211,4 +228,73 @@ public class getDataFromJimi {
 	        return deviceTrackModeList;
 	        
         }
+    
+    public RelaySendCommandResponse getGpsApiDeviceRelayData(IgnitionOffPostRequest ignitionOffPostRequest) throws Exception {
+
+    	//first get the jimmy access token
+    	String access_token = getAccessTokenFromJimi();
+        //then using jimmy api services and providing credentials in params
+        SimpleDateFormat gmtDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        gmtDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+        //Current Date Time in GMT
+        System.out.println("Current Date and Time in GMT time zone: " + gmtDateFormat.format(new Date()));
+
+        URL url_location = new URL(jimiUrl);
+        Map<String, String> allRequiredParams = new HashMap<>();
+        allRequiredParams.put("method", "jimi.open.instruction.send");
+        allRequiredParams.put("timestamp", gmtDateFormat.format(new Date()));
+        allRequiredParams.put("access_token", access_token);
+        allRequiredParams.put("imei",ignitionOffPostRequest.getImei());
+     // Command message json character string //      
+        allRequiredParams.put("inst_param_json", "{\"inst_id\":\"113\",\"inst_template\":\"RELAY,1#\",\"params\":[],\"is_cover\":\"true\"}");
+        allRequiredParams.putAll(commonParams);
+        String res = getJsonResponse(allRequiredParams,url_location);
+        JSONObject json_res = new JSONObject(res.toString());    
+        
+        RelaySendCommandResponse relaySendCommandResponseModel = new RelaySendCommandResponse();
+        
+        relaySendCommandResponseModel.setCode(json_res.getInt("code"));
+        relaySendCommandResponseModel.setMessage(json_res.getString("message"));
+        relaySendCommandResponseModel.setResult(json_res.getString("result"));
+		return relaySendCommandResponseModel;
+    }
+    
+    public CreateGeoFenceResponse CreatingGeoFence(CreateGeoFencePostRequest createGeoFencePostRequest) throws Exception {
+
+    	//first get the jimmy access token
+    	String access_token = getAccessTokenFromJimi();
+        //then using jimmy api services and providing credentials in params
+        SimpleDateFormat gmtDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        gmtDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+        //Current Date Time in GMT
+        System.out.println("Current Date and Time in GMT time zone: " + gmtDateFormat.format(new Date()));
+
+        URL url_location = new URL(jimiUrl);
+        Map<String, String> allRequiredParams = new HashMap<>();
+        allRequiredParams.put("method", "jimi.open.device.fence.create");
+        allRequiredParams.put("timestamp", gmtDateFormat.format(new Date()));
+        allRequiredParams.put("access_token", access_token);
+        allRequiredParams.put("imei",createGeoFencePostRequest.getImei());
+     // Command message json character string //      
+        allRequiredParams.put("fence_name",createGeoFencePostRequest.getFenceName() );
+        allRequiredParams.put("alarm_type",createGeoFencePostRequest.getAlarmType());
+        allRequiredParams.put("report_mode",createGeoFencePostRequest.getReportMode());
+        allRequiredParams.put("alarm_switch",createGeoFencePostRequest.getAlarmSwitch());
+        allRequiredParams.put("lng",createGeoFencePostRequest.getLng());
+        allRequiredParams.put("radius",createGeoFencePostRequest.getRadius());
+        allRequiredParams.put("zoom_level",createGeoFencePostRequest.getZoomLevel());
+        allRequiredParams.put("lat",createGeoFencePostRequest.getLat());
+        allRequiredParams.put("map_type","GOOGLE");
+        allRequiredParams.putAll(commonParams);
+        String res = getJsonResponse(allRequiredParams,url_location);
+        JSONObject json_res = new JSONObject(res.toString());    
+        
+        CreateGeoFenceResponse CreateGeoFenceResponse = new CreateGeoFenceResponse();
+        
+        CreateGeoFenceResponse.setCode(json_res.getInt("code"));
+        CreateGeoFenceResponse.setMessage(json_res.getString("message"));
+        CreateGeoFenceResponse.setResult(json_res.getString("result"));
+		return CreateGeoFenceResponse;
+    }
+        
 }

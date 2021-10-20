@@ -2,11 +2,18 @@ package com.spring.gpsApiData.service;
 
 import java.util.*;
 import com.spring.gpsApiData.entities.historyData;
+import com.spring.gpsApiData.model.CreateGeoFencePostRequest;
+import com.spring.gpsApiData.model.CreateGeoFenceResponse;
 import com.spring.gpsApiData.model.DeviceTrackListModel;
+import com.spring.gpsApiData.model.IgnitionOffPostRequest;
+import com.spring.gpsApiData.model.RelaySendCommandResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.spring.gpsApiData.utils.getDataFromJimi;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.spring.gpsApiData.constants.Constants.Status;
@@ -107,4 +114,93 @@ public class GpsDataServiceImpl implements GpsDataService {
         dao.save(data);
         return "done";
     }
+
+	@Override
+	public RelaySendCommandResponse commandToDevice(IgnitionOffPostRequest ignitionOffPostRequest) throws Exception {
+		
+		RelaySendCommandResponse relayInfo = getDataFromJimi.getGpsApiDeviceRelayData(ignitionOffPostRequest);
+		
+		RelaySendCommandResponse response = new RelaySendCommandResponse();
+		response.setCode(relayInfo.getCode());
+		response.setResult(relayInfo.getResult());
+		
+		if(relayInfo.getCode()==12005)
+		{
+			if( relayInfo.getMessage().contains("225"))
+			{
+				response.setMessage("TimeOut");			
+			}
+			else if(relayInfo.getMessage().contains("226"))
+			{
+				response.setMessage("Parameter error");
+			}
+			else if(relayInfo.getMessage().contains("227"))
+			{
+				response.setMessage("The command is not executed correctly");
+			}
+			else if(relayInfo.getMessage().contains("228"))
+			{
+				response.setMessage("The device is not online");
+			}
+			else if(relayInfo.getMessage().contains("229"))
+			{
+				response.setMessage("Network error, connection error, etc.");
+			}
+			else if(relayInfo.getMessage().contains("238"))
+			{
+				response.setMessage("Device interrupted");
+			}
+			else if(relayInfo.getMessage().contains("240"))
+			{
+				response.setMessage("Data format error");
+			}
+			else if(relayInfo.getMessage().contains("243"))
+			{
+				response.setMessage("Not supported by device");
+			}
+			else if(relayInfo.getMessage().contains("252"))
+			{
+				response.setMessage("The device is busy");
+			}
+	
+		}
+		else if(relayInfo.getCode()==0)
+		{
+			response.setMessage("Send command successful");
+		}
+		return response; 
+	}
+	
+	@Override
+	public CreateGeoFenceResponse createGeoFence(CreateGeoFencePostRequest createGeoFencePostRequest) throws Exception {
+		
+		CreateGeoFenceResponse createGeoFenceResponse = getDataFromJimi.CreatingGeoFence(createGeoFencePostRequest);
+		CreateGeoFenceResponse response = new CreateGeoFenceResponse();
+		response.setCode(createGeoFenceResponse.getCode());
+		response.setResult(createGeoFenceResponse.getResult());
+			if(createGeoFenceResponse.getCode()==12003)
+			{	
+				if(createGeoFenceResponse.getMessage().contains("41001"))
+				{
+					response.setMessage("Exceed max number of Geo-fences supported");	
+				}
+				else if(createGeoFenceResponse.getMessage().contains("41002"))
+				{
+					response.setMessage("Fence name is already exists");	
+				}
+				else if(createGeoFenceResponse.getMessage().contains("41003"))
+				{
+					response.setMessage("The device is not online");	
+				}
+				else if(createGeoFenceResponse.getMessage().contains("41004"))
+				{
+					response.setMessage("Geo-fence operation failed");	
+				}
+			}
+			else if(createGeoFenceResponse.getCode()==0)
+			{
+				response.setMessage("Create an electronic fence successfully");
+			}
+		return response; 
+	}
 }
