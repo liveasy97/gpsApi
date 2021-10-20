@@ -1,14 +1,13 @@
 package com.spring.gpsApiData.controller;
 
 import java.util.List;
-import java.util.stream.Stream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.spring.gpsApiData.entities.historyData;
+import com.spring.gpsApiData.model.CreateGeoFencePostRequest;
+import com.spring.gpsApiData.model.CreateGeoFenceResponse;
 import com.spring.gpsApiData.model.DeviceTrackListModel;
 import com.spring.gpsApiData.model.IgnitionOffPostRequest;
-import com.spring.gpsApiData.model.RelaySendCommandResponseModel;
+import com.spring.gpsApiData.model.RelaySendCommandResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,8 +16,6 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
 
 import com.spring.gpsApiData.service.GpsDataService;
-
-import lombok.extern.java.Log;
 
 @RestController
 public class Controller {
@@ -73,16 +70,28 @@ public class Controller {
 	}
 	
 	@PostMapping("/ignitionoff")
-	private ResponseEntity<RelaySendCommandResponseModel> sendInstructionToDevice(@RequestBody IgnitionOffPostRequest ignitionOffPostRequest) throws Exception {
+	private ResponseEntity<RelaySendCommandResponse> sendInstructionToDevice(@RequestBody IgnitionOffPostRequest ignitionOffPostRequest) throws Exception {
 				
-			RelaySendCommandResponseModel response = gpsdataService.commandToDevice(ignitionOffPostRequest);
-		   
-			if(response.getCode()==12005)
+			RelaySendCommandResponse responseFromJimi = gpsdataService.commandToDevice(ignitionOffPostRequest);
+			if(responseFromJimi.getCode()==12005 || responseFromJimi.getCode()==0 )
 			{
-				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+				
+				return new ResponseEntity<>(responseFromJimi, HttpStatus.OK);
 			}
 		    
-		    return new ResponseEntity<>(response, HttpStatus.OK);
-
+		    return new ResponseEntity<>(responseFromJimi, HttpStatus.BAD_REQUEST);
+	}
+	
+	@PostMapping("/creategeofence")
+	private ResponseEntity<CreateGeoFenceResponse> createGeoFenceforImei(@RequestBody CreateGeoFencePostRequest createGeoFencePostRequest) throws Exception {
+				
+		CreateGeoFenceResponse responseFromJimi = gpsdataService.createGeoFence(createGeoFencePostRequest);
+		if(responseFromJimi.getCode()==12003 || responseFromJimi.getCode()==0 )
+		{
+			
+			return new ResponseEntity<>(responseFromJimi, HttpStatus.OK);
+		}
+	    
+	    return new ResponseEntity<>(responseFromJimi, HttpStatus.BAD_REQUEST);
 	}
 }
