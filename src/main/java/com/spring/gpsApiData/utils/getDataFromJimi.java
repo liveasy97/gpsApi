@@ -20,6 +20,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -142,6 +144,18 @@ public class getDataFromJimi {
         }
 	}
 	
+	public String convert_GMT_To_IST(String gpstime) throws ParseException
+	{
+		DateFormat istDateFormat = new SimpleDateFormat("dd/MM/yyyy" + " "+ " HH:mm:ss");
+		istDateFormat.setTimeZone(TimeZone.getTimeZone("IST"));
+		
+		SimpleDateFormat gmtDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        gmtDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+		Date date = gmtDateFormat.parse(gpstime);
+		return istDateFormat.format(date);
+		
+	}
+	
     public  historyData getGpsApiDataUsingImei(String imeis) throws Exception {
     	
     	//first get the jimmy access token
@@ -175,7 +189,7 @@ public class getDataFromJimi {
 	        gpsDataModel.setDeviceName(json.getString("deviceName"));
 	        gpsDataModel.setPowerValue(json.getString("powerValue"));
 	        gpsDataModel.setDirection(json.getString("direction"));
-	        gpsDataModel.setGpsTime(json.getString("gpsTime"));
+	        gpsDataModel.setGpsTime(convert_GMT_To_IST(json.getString("gpsTime")));
 	        System.out.println(gpsDataModel);	
 	        return gpsDataModel;
     }
@@ -214,13 +228,13 @@ public class getDataFromJimi {
 	        	   model.setEndLat(trackModel.getString("endLat"));
 	        	   model.setEndLng(trackModel.getString("endLng"));
 	        	   model.setEndMileage(trackModel.getString("endMileage"));
-	        	   model.setEndTime(trackModel.getString("endTime"));
+	        	   model.setEndTime(convert_GMT_To_IST(trackModel.getString("endTime")));
 	        	   model.setImei(trackModel.getString("imei"));
 	        	   model.setRunTimeSecond(trackModel.getString("runTimeSecond"));
 	        	   model.setStartLat(trackModel.getString("startLat"));
-	        	   model.setStartLng(trackModel.getString("startLat"));
+	        	   model.setStartLng(trackModel.getString("startLng"));
 	        	   model.setStartMileage(trackModel.getString("startMileage"));
-	        	   model.setStartTime(trackModel.getString("startTime"));
+	        	   model.setStartTime(convert_GMT_To_IST(trackModel.getString("startTime")));
 	        
 	        	   deviceTrackModeList.add(model);
 	           }
