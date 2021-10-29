@@ -4,9 +4,12 @@ import java.util.List;
 import com.spring.gpsApiData.entities.historyData;
 import com.spring.gpsApiData.model.CreateGeoFencePostRequest;
 import com.spring.gpsApiData.model.CreateGeoFenceResponse;
+import com.spring.gpsApiData.model.DeviceTrackListAndStoppagesListResponse;
 import com.spring.gpsApiData.model.DeviceTrackListModel;
 import com.spring.gpsApiData.model.IgnitionOffPostRequest;
+import com.spring.gpsApiData.model.JimiException;
 import com.spring.gpsApiData.model.RelaySendCommandResponse;
+import com.spring.gpsApiData.model.RouteHistoryResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,20 +28,13 @@ public class Controller {
 	private List<historyData> getGpsData(@PathVariable String imei) throws Exception {
 		return gpsdataService.getgpsDataWithoutSaving(imei);
 	}
-	
-	@ExceptionHandler(MissingServletRequestParameterException.class)
-	public ResponseEntity<String> handleMissingParams(MissingServletRequestParameterException ex) {
-	    String name = ex.getParameterName();
-	    System.out.println(name + " parameter is missing");
-	    return new ResponseEntity<>(name + " parameter is missing", HttpStatus.BAD_REQUEST);
-	}
+
 	@GetMapping("/locationbyimei")
-	public ResponseEntity<List<DeviceTrackListModel>> getHistoryData(
+	public ResponseEntity<DeviceTrackListAndStoppagesListResponse> getHistoryData(
 			@RequestParam(required = false) String startTime,
 			@RequestParam(required = false) String endTime,
 			@RequestParam(required = true) String imei) throws Exception {
-		
-			return new ResponseEntity<>(gpsdataService.getHistoryDataDirectFromJimi(imei, startTime, endTime) , HttpStatus.OK);
+		return new ResponseEntity<>(gpsdataService.getHistoryDataDirectFromJimi(imei, startTime, endTime) , HttpStatus.OK);
 	}
 
 //	@PostMapping("/locationbyimei")
@@ -91,5 +87,25 @@ public class Controller {
 		}
 	    
 	    return new ResponseEntity<>(responseFromJimi, HttpStatus.BAD_REQUEST);
+	}
+	
+//	@GetMapping("/routehistory")
+//	public ResponseEntity<List<RouteHistoryResponse>> routeHistory(
+//			@RequestParam(required = false) String startTime,
+//			@RequestParam(required = false) String endTime,
+//			@RequestParam(required = true) String imei) throws Exception {
+//		
+//			return new ResponseEntity<>(gpsdataService.routeHistory(imei, startTime, endTime) , HttpStatus.OK);
+//	}
+	@ExceptionHandler(JimiException.class)
+	public ResponseEntity<String> handleJimiException(JimiException ex) {
+		return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+	}
+	
+	@ExceptionHandler(MissingServletRequestParameterException.class)
+	public ResponseEntity<String> handleMissingParams(MissingServletRequestParameterException ex) {
+		String name = ex.getParameterName();
+		System.out.println(name + " parameter is missing");
+		return new ResponseEntity<>(name + " parameter is missing", HttpStatus.BAD_REQUEST);
 	}
 }
