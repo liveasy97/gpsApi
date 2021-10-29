@@ -5,17 +5,12 @@ import lombok.Data;
 @Data
 public class DeviceTrackListModel {
 	
-	double avgSpeed;
-	double distance;
-	String endLat ; 
-    String endLng ;
-    String endTime;
-    String imei;
-    String runTimeSecond;   
-    String startLat;
-    String startLng;
-    String startTime;
-    String startMileage;
-    String endMileage;
-
+	String gpsSpeed;
+	String satellite;
+	double lat ; 
+    double lng ;
+    String gpsTime;
+    String direction;
+    String posType;   
+ 
 }

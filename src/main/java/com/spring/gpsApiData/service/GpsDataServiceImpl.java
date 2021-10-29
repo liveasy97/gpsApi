@@ -4,9 +4,11 @@ import java.util.*;
 import com.spring.gpsApiData.entities.historyData;
 import com.spring.gpsApiData.model.CreateGeoFencePostRequest;
 import com.spring.gpsApiData.model.CreateGeoFenceResponse;
+import com.spring.gpsApiData.model.DeviceTrackListAndStoppagesListResponse;
 import com.spring.gpsApiData.model.DeviceTrackListModel;
 import com.spring.gpsApiData.model.IgnitionOffPostRequest;
 import com.spring.gpsApiData.model.RelaySendCommandResponse;
+import com.spring.gpsApiData.model.RouteHistoryResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,9 +90,9 @@ public class GpsDataServiceImpl implements GpsDataService {
     
     // fetching data directly from  jimi //
 	@Override
-    public List<DeviceTrackListModel> getHistoryDataDirectFromJimi(String imei, String startTime, String endTime) throws Exception {
+    public DeviceTrackListAndStoppagesListResponse getHistoryDataDirectFromJimi(String imei, String startTime, String endTime) throws Exception {
 		    		
-		List<DeviceTrackListModel> deviceTrackList = getDataFromJimi.getGpsApiDataUsingImeiStartTimeEndTime(imei,startTime,endTime);
+		DeviceTrackListAndStoppagesListResponse deviceTrackList = getDataFromJimi.getGpsApiDataUsingImeiStartTimeEndTime(imei,startTime,endTime);
 		return deviceTrackList; 	
     }
 
@@ -203,4 +205,10 @@ public class GpsDataServiceImpl implements GpsDataService {
 			}
 		return response; 
 	}
+	
+//	@Override
+//    public List<RouteHistoryResponse> routeHistory(String imei, String startTime, String endTime) throws Exception {
+//		    		
+//		return  getDataFromJimi.routeHistory(imei,startTime,endTime);
+//    }
 }
