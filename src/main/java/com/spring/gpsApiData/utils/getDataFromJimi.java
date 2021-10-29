@@ -454,7 +454,7 @@ public class getDataFromJimi {
         
     public duration findDuration(String starttime,String endTime) throws ParseException
     {
-    	SimpleDateFormat istFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+    	SimpleDateFormat istFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
     	Date d1 = null;
     	Date d2 = null;
 
