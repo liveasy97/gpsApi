@@ -9,7 +9,7 @@ import com.spring.gpsApiData.model.DeviceTrackListModel;
 import com.spring.gpsApiData.model.IgnitionOffPostRequest;
 import com.spring.gpsApiData.model.JimiException;
 import com.spring.gpsApiData.model.RelaySendCommandResponse;
-import com.spring.gpsApiData.model.RouteHistoryResponse;
+import com.spring.gpsApiData.model.RouteHistoryModel;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -89,14 +89,14 @@ public class Controller {
 	    return new ResponseEntity<>(responseFromJimi, HttpStatus.BAD_REQUEST);
 	}
 	
-//	@GetMapping("/routehistory")
-//	public ResponseEntity<List<RouteHistoryResponse>> routeHistory(
-//			@RequestParam(required = false) String startTime,
-//			@RequestParam(required = false) String endTime,
-//			@RequestParam(required = true) String imei) throws Exception {
-//		
-//			return new ResponseEntity<>(gpsdataService.routeHistory(imei, startTime, endTime) , HttpStatus.OK);
-//	}
+	@GetMapping("/routehistory")
+	public ResponseEntity<List<RouteHistoryModel>> routeHistory(
+			@RequestParam(required = false) String startTime,
+			@RequestParam(required = false) String endTime,
+			@RequestParam(required = true) String imei) throws Exception {
+		
+			return new ResponseEntity<>(gpsdataService.routeHistory(imei, startTime, endTime) , HttpStatus.OK);
+	}
 	@ExceptionHandler(JimiException.class)
 	public ResponseEntity<String> handleJimiException(JimiException ex) {
 		return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
