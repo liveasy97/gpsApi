@@ -8,7 +8,7 @@ import com.spring.gpsApiData.model.DeviceTrackListModel;
 import com.spring.gpsApiData.model.IgnitionOffPostRequest;
 import com.spring.gpsApiData.model.JimiException;
 import com.spring.gpsApiData.model.RelaySendCommandResponse;
-import com.spring.gpsApiData.model.RouteHistoryResponse;
+import com.spring.gpsApiData.model.RouteHistoryModel;
 import com.spring.gpsApiData.model.duration;
 import com.spring.gpsApiData.model.StoppagesListModel;
 
@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -154,9 +155,9 @@ public class getDataFromJimi {
         }
 	}
 	
-	public String convert_GMT_To_IST(String gpstime) throws ParseException
+	public String convert_GMT_To_IST(String gpstime, String format) throws ParseException
 	{
-		DateFormat istDateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+		DateFormat istDateFormat = new SimpleDateFormat(format);
 		istDateFormat.setTimeZone(TimeZone.getTimeZone("IST"));
 		
 		SimpleDateFormat gmtDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -166,17 +167,24 @@ public class getDataFromJimi {
 		
 	}
 	
+	public String convert_GMT_To_IST(String gpsTime) throws ParseException
+	{
+		return convert_GMT_To_IST(gpsTime, "dd-MM-yyyy HH:mm:ss");
+	}
+	
 	public String convert_IST_To_GMT(String timeEnteredByuser) throws ParseException
 	{
-		System.out.println("timeEnteredbyuser : " + timeEnteredByuser);
+		//System.out.println("timeEnteredbyuser : " + timeEnteredByuser);
+		
 		DateFormat istDateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 		istDateFormat.setTimeZone(TimeZone.getTimeZone("IST"));
 		
 		SimpleDateFormat gmtDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         gmtDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-		Date date = istDateFormat.parse(timeEnteredByuser);
-		return gmtDateFormat.format(date);
 		
+        Date date = istDateFormat.parse(timeEnteredByuser);
+		
+        return gmtDateFormat.format(date);
 	}
 	
     public  historyData getGpsApiDataUsingImei(String imeis) throws Exception {
@@ -244,26 +252,35 @@ public class getDataFromJimi {
         DeviceTrackListAndStoppagesListResponse response = new DeviceTrackListAndStoppagesListResponse();
         List<DeviceTrackListModel> deviceTrackDataList = new ArrayList<DeviceTrackListModel>();  
   
-	        if (jsonArray != null) { 
-	           for (int i=0;i<jsonArray.length();i++){
-	        	   JSONObject trackModel = (JSONObject) jsonArray.get(i);
-	        	   DeviceTrackListModel obj = new DeviceTrackListModel();
-	        	   obj.setDirection(trackModel.getString("direction"));
-	        	   obj.setGpsSpeed(trackModel.getString("gpsSpeed"));
-	        	   obj.setGpsTime(convert_GMT_To_IST(trackModel.getString("gpsTime")));
-	        	   obj.setLat(trackModel.getDouble("lat"));
-	        	   obj.setLng(trackModel.getDouble("lng"));
-	        	   obj.setPosType(trackModel.getString("posType"));
-	        	   obj.setSatellite(trackModel.getString("satellite"));
-	        	   deviceTrackDataList.add(obj);
-	           }
-	        } 
+        if (jsonArray != null)
+        {
+           HashSet<String> set = new HashSet<>();
+           for (int i=0;i<jsonArray.length();i++)
+           {
+        	   JSONObject trackModel = (JSONObject) jsonArray.get(i);
+        	   
+        	   String key = convert_GMT_To_IST(trackModel.getString("gpsTime"), "yyyy-MM-dd-HH-mm");
+        	   if (!set.contains(key)) {
+        		   DeviceTrackListModel obj = new DeviceTrackListModel();
+        		   obj.setDirection(trackModel.getString("direction"));
+        		   obj.setGpsSpeed(trackModel.getString("gpsSpeed"));
+        		   obj.setGpsTime(convert_GMT_To_IST(trackModel.getString("gpsTime")));
+        		   obj.setLat(trackModel.getDouble("lat"));
+        		   obj.setLng(trackModel.getDouble("lng"));
+        		   obj.setPosType(trackModel.getString("posType"));
+        		   obj.setSatellite(trackModel.getString("satellite"));
+        		   deviceTrackDataList.add(obj);
+
+        		   set.add(key);
+        	   }   
+           }
+        } 
 	        
-	        response.setDeviceTrackList(deviceTrackDataList);
-	        response.setStoppagesList(getStoppagesList(deviceTrackDataList));
-	        return response;
+        response.setDeviceTrackList(deviceTrackDataList);
+        response.setStoppagesList(getStoppagesList(deviceTrackDataList));
+        return response;
 	        
-        }
+    }
     
     public RelaySendCommandResponse getGpsApiDeviceRelayData(IgnitionOffPostRequest ignitionOffPostRequest) throws Exception {
 
@@ -333,82 +350,94 @@ public class getDataFromJimi {
 		return CreateGeoFenceResponse;
     }
     
-//    public List<RouteHistoryResponse> routeHistory(String imei,String startTime, String endTime) throws Exception {
-//
-//    	//first get the jimmy access token
-//    	String access_token = getAccessTokenFromJimi();
-//        //then using jimmy api services and providing credentials in params
-//        SimpleDateFormat gmtDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//        gmtDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-//        //Current Date Time in GMT
-//        System.out.println("Current Date and Time in GMT time zone: " + gmtDateFormat.format(new Date()));
-//
-//        URL url_location = new URL(jimiUrl);
-//        Map<String, String> allRequiredParams = new HashMap<>();
-//        allRequiredParams.put("method", "jimi.device.track.list");
-//        allRequiredParams.put("timestamp", gmtDateFormat.format(new Date()));
-//        allRequiredParams.put("access_token", access_token);
-//        allRequiredParams.put("imei", imei);
-//        allRequiredParams.put("begin_time", startTime);
-//        allRequiredParams.put("end_time", endTime);
-//        allRequiredParams.putAll(commonParams);
-//        String res = getJsonResponse(allRequiredParams,url_location);
-//        JSONArray jsonArray = convertJsonResponseToJsonArray(res);
-//        if (jsonArray == null || jsonArray.length() == 0) {
-//        	throw new JimiException("EmptyResponse");
-//        }  
-//       
-//       List<RouteHistoryResponse> ls =new ArrayList<RouteHistoryResponse>();
-//        
-//        	int vehicle = 1;
-//        	int i=0;
-//	           while(i < jsonArray.length()){
-//	        	   JSONObject trackModel = (JSONObject) jsonArray.get(i);
-//	        	   RouteHistoryResponse routeHistoryResponse = new RouteHistoryResponse();
-//	        	   if(vehicle ==1 && Float.parseFloat(trackModel.getString("gpsSpeed")) > 2)
-//	        	   { 
-//	        		   routeHistoryResponse.setTruckStatus("running");
-//	        		   routeHistoryResponse.setStartTime(convert_GMT_To_IST(trackModel.getString("gpsTime")));
-//	        		   
-//	        		   System.out.println("travelled starttime is:" + convert_GMT_To_IST(trackModel.getString("gpsTime")));
-//	        		   int j = i+1;
-//	        		   while(j < jsonArray.length() && Float.parseFloat(((JSONObject) jsonArray.get(j)).getString("gpsSpeed")) > 2 && vehicle==1)
-//	        		   {
-//	        			  System.out.println("gps speed while running:" + ((JSONObject) jsonArray.get(j)).getString("gpsSpeed"));
-//	        			  j++;
-//	        		   }
-//	        		   vehicle = 0;
-//	        		   i = j;
-//	        		   routeHistoryResponse.setEndTime(convert_GMT_To_IST(((JSONObject) jsonArray.get(j-1)).getString("gpsTime"))); 
-//	        		   System.out.println("travelled endtime is:" +convert_GMT_To_IST(((JSONObject) jsonArray.get(j-1)).getString("gpsTime")));
-//	        		   ls.add(routeHistoryResponse);
-//	        		   
-//	        	   }
-//	        	   else if(vehicle ==0 && Float.parseFloat(trackModel.getString("gpsSpeed")) < 2)
-//	        	   { 
-//	  
-//	        		   routeHistoryResponse.setTruckStatus("stopped");
-//	        		   routeHistoryResponse.setStartTime(convert_GMT_To_IST(trackModel.getString("gpsTime")));
-//	        		   System.out.println("stopped starttime is:" + convert_GMT_To_IST(trackModel.getString("gpsTime")));
-//	        		   routeHistoryResponse.setLat(trackModel.getDouble("lat"));
-//	        		   routeHistoryResponse.setLng(trackModel.getDouble("lng"));
-//	        		   int j = i+1;
-//	        		   while(j < jsonArray.length() && Float.parseFloat(((JSONObject) jsonArray.get(j)).getString("gpsSpeed")) < 2 && vehicle==0)
-//	        		   {
-//	        			   System.out.println("gps speed while stopped:" + ((JSONObject) jsonArray.get(j)).getString("gpsSpeed"));
-//	        			  j++;
-//	        		   }
-//	        		   vehicle = 1;
-//	        		   i = j;
-//	        		   routeHistoryResponse.setEndTime(convert_GMT_To_IST(((JSONObject) jsonArray.get(j-1)).getString("gpsTime"))); 
-//	        		   System.out.println("stopped endtime is:" +convert_GMT_To_IST(((JSONObject) jsonArray.get(j-1)).getString("gpsTime")));
-//	        		   ls.add(routeHistoryResponse);
-//	        		   
-//	        	   }
-//	           }
-//	           System.out.println("list is : " + ls);
-//		return ls;
-//    }       
+    public List<RouteHistoryModel> routeHistory(String imei,String startTime, String endTime) throws Exception {
+
+    	//first get the jimmy access token
+    	String access_token = getAccessTokenFromJimi();
+        //then using jimmy api services and providing credentials in params
+        SimpleDateFormat gmtDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        gmtDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+        //Current Date Time in GMT
+        System.out.println("Current Date and Time in GMT time zone: " + gmtDateFormat.format(new Date()));
+
+        URL url_location = new URL(jimiUrl);
+        Map<String, String> allRequiredParams = new HashMap<>();
+        allRequiredParams.put("method", "jimi.device.track.list");
+        allRequiredParams.put("timestamp", gmtDateFormat.format(new Date()));
+        allRequiredParams.put("access_token", access_token);
+        allRequiredParams.put("imei", imei);
+        allRequiredParams.put("begin_time", convert_IST_To_GMT(startTime));
+        allRequiredParams.put("end_time", convert_IST_To_GMT(endTime));
+        allRequiredParams.putAll(commonParams);
+        String res = getJsonResponse(allRequiredParams,url_location);
+        JSONArray jsonArray = convertJsonResponseToJsonArray(res);
+        if (jsonArray == null || jsonArray.length() == 0) {
+        	throw new JimiException("EmptyResponse");
+        }         
+       List<RouteHistoryModel> list =new ArrayList<RouteHistoryModel>();
+       int i=0;
+       while(i < jsonArray.length()){
+    	   
+    	   JSONObject obj = (JSONObject) jsonArray.get(i);
+    	   RouteHistoryModel routeHistoryObj = new RouteHistoryModel();
+    	   if( Float.parseFloat(obj.getString("gpsSpeed")) !=0 )
+    	   { 
+    		   routeHistoryObj.setTruckStatus("running");
+    		   routeHistoryObj.setStartTime(convert_GMT_To_IST(obj.getString("gpsTime")));
+    		   
+    		   System.out.println("running started :" + routeHistoryObj.getStartTime());
+    		   int j = i+1;
+    		   while(j < jsonArray.length() && Float.parseFloat(((JSONObject) jsonArray.get(j)).getString("gpsSpeed")) !=0 )
+    		   {
+    			  System.out.println("gps speed while running:" + ((JSONObject) jsonArray.get(j)).getString("gpsSpeed"));
+    			  j++;
+    		   }
+    		   i = j;
+    		   if( i < jsonArray.length() )
+	   			{
+    			   routeHistoryObj.setEndTime(convert_GMT_To_IST(((JSONObject) jsonArray.get(i)).getString("gpsTime"))); 
+	   			}
+	   			else
+	   			{
+	   				routeHistoryObj.setEndTime(convert_GMT_To_IST(((JSONObject) jsonArray.get(i-1)).getString("gpsTime"))); 	
+	   			} 
+    		   System.out.println("running ended :" + routeHistoryObj.getEndTime());
+    		   duration durationObj = findDuration(routeHistoryObj.getStartTime(),routeHistoryObj.getEndTime());
+    		   routeHistoryObj.setDuration(durationObj.toString());
+    		   list.add(routeHistoryObj);   		   
+    	   }
+    	   else if( Float.parseFloat(obj.getString("gpsSpeed")) == 0)
+    	   { 
+    		   routeHistoryObj.setTruckStatus("stopped");
+    		   routeHistoryObj.setStartTime(convert_GMT_To_IST(obj.getString("gpsTime")));
+    		   System.out.println("stopped :" + convert_GMT_To_IST(obj.getString("gpsTime")));
+    		   routeHistoryObj.setLat(obj.getDouble("lat"));
+    		   routeHistoryObj.setLng(obj.getDouble("lng"));
+    		   int j = i+1;
+    		   while(j < jsonArray.length() && Float.parseFloat(((JSONObject) jsonArray.get(j)).getString("gpsSpeed")) ==0)
+    		   {
+    			   System.out.println("gps speed while stopped:" + ((JSONObject) jsonArray.get(j)).getString("gpsSpeed"));
+    			  j++;
+    		   }
+    		 
+    		   i = j;
+    		   if( i < jsonArray.length() )
+	   			{
+    			   routeHistoryObj.setEndTime(convert_GMT_To_IST(((JSONObject) jsonArray.get(i)).getString("gpsTime"))); 
+	   			}
+	   			else
+	   			{
+	   				routeHistoryObj.setEndTime(convert_GMT_To_IST(((JSONObject) jsonArray.get(i-1)).getString("gpsTime"))); 	
+	   			} 
+    		   System.out.println("running after stopped(stoppped end time) :" +routeHistoryObj.getEndTime());
+    		   duration durationObj = findDuration(routeHistoryObj.getStartTime(),routeHistoryObj.getEndTime());
+    		   routeHistoryObj.setDuration(durationObj.toString());
+    		   list.add(routeHistoryObj); 		   
+    	   }
+       }
+       System.out.println("list is : " + list);
+       return list;
+    }       
     
     // This is for locationbyimei strttime endtime params ...stoppageslist //
     public List<StoppagesListModel> getStoppagesList(List<DeviceTrackListModel> deviceTrackDataList) throws Exception {
@@ -426,6 +455,8 @@ public class getDataFromJimi {
     			StoppagesListModel stoppageObj = new StoppagesListModel();
     			stoppageObj.setTruckStatus("stopped");
     			stoppageObj.setStartTime(deviceTrackDataList.get(i).getGpsTime());
+    			stoppageObj.setLat(deviceTrackDataList.get(i).getLat());
+    			stoppageObj.setLng(deviceTrackDataList.get(i).getLng());
     			int j = i+1;
     			while(j < deviceTrackDataList.size() && Float.parseFloat(deviceTrackDataList.get(j).getGpsSpeed()) == 0)
     			{
@@ -435,14 +466,10 @@ public class getDataFromJimi {
     			if( i < deviceTrackDataList.size() )
     			{
     				stoppageObj.setEndTime(deviceTrackDataList.get(i).getGpsTime()); 
-    				stoppageObj.setLat(deviceTrackDataList.get(i).getLat());
-    				stoppageObj.setLng(deviceTrackDataList.get(i).getLng());
     			}
     			else
     			{
     				stoppageObj.setEndTime(deviceTrackDataList.get(i-1).getGpsTime()); 
-    				stoppageObj.setLat(deviceTrackDataList.get(i-1).getLat());
-    				stoppageObj.setLng(deviceTrackDataList.get(i-1).getLng());		
     			}
     			duration durationObj = findDuration(stoppageObj.getStartTime(),stoppageObj.getEndTime());
     			stoppageObj.setDuration(durationObj.toString());
