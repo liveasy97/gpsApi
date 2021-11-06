@@ -11,4 +11,5 @@ public class RouteHistoryModel {
 	private String endTime;
 	private double lat;
 	private double lng;
+	private double distanceCovered;
 }
