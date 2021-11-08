@@ -5,14 +5,14 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [ dev ]
+    branches: [ main ]
 defaults:
  run:
   working-directory: ./
 jobs:
   build:
 
-    runs-on: ['self-hosted', 'Linux', 'X64']
+    runs-on: ['self-hosted', 'Linux', 'X64',main]
 
     steps:
     - uses: actions/checkout@v2
@@ -30,4 +30,5 @@ jobs:
     - run: sudo docker image rm gps || true
     - run: sudo docker build -t gps .
     - run: sudo docker run --name gpsPostgres -e POSTGRES_ROOT_PASSWORD=postgres -e POSTGRES_DATABASE=postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -d postgres:alpine 
-    - run: sudo docker run --name gpsApiContainer -p 3000:3000 --link gpsPostgres:postgres gps | echo "success"
+    - run: sudo docker run -d --env-file /home/ubuntu/test.env -p 3000:3000 --name gpsApiContainer --link gpsPostgres:postgres gps | echo "success"
+    
