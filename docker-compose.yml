@@ -1,0 +1,26 @@
+version: '3.3'
+
+services:
+  app:
+    container_name: gps-data-spring
+    image: gps-data-spring
+    build:
+      context: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db/postgres
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=create-drop
+  db:
+    image: 'postgres:13.1-alpine'
+    ports:
+      - "3001:5432"
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+

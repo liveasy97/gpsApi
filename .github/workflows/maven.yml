@@ -25,9 +25,9 @@ jobs:
       run: mvn -B package --file pom.xml
     - run: cd ~/actions-runner/deploy/gpsApi/gpsApi
     - run: sudo docker container stop gpsApiContainer || true
-    - run: sudo docker container start gpsPostgres || true
-    - run: sudo docker container prune -f
+    - run: sudo docker container stop gpsPostgres || true
+    - run: sudo docker container rm gpsApiContainer || true
     - run: sudo docker image rm gps || true
     - run: sudo docker build -t gps .
-    - run: sudo docker run --name gpsPostgres -e POSTGRES_ROOT_PASSWORD=postgres -e POSTGRES_DATABASE=postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -d postgres:alpine 
-    - run: sudo docker run --name gpsApiContainer -p 3000:3000 --link gpsPostgres:postgres gps | echo "success"
+    - run:  sudo docker container start gpsPostgres || sudo docker run --name gpsPostgres -e POSTGRES_ROOT_PASSWORD=postgres -e POSTGRES_DATABASE=postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -d postgres:alpine 
+    - run: sudo docker run -d --env-file /home/ubuntu/test.env -p 3000:3000 --name gpsApiContainer --link gpsPostgres:postgres gps | echo "success"
