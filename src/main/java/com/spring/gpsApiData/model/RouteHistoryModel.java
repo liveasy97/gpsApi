@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class RouteHistoryModel {
-	
+
 	private String truckStatus;
 	private String duration;
 	private String startTime;
@@ -12,4 +12,5 @@ public class RouteHistoryModel {
 	private double lat;
 	private double lng;
 	private double distanceCovered;
+	private double totalDistanceCovered;
 }

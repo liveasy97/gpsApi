@@ -7,10 +7,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -120,44 +119,26 @@ public class getDataFromJimi {
 		for (int c; (c = in.read()) >= 0;)
 			sb.append((char) c);
 		res = sb.toString();
-		System.out.println(res);
-
-//	        if (conn.getResponseCode() == 400) {
-//	        	JSONObject myResponse = new JSONObject(res);
-//	        	String message = myResponse.getString("message");
-//	        	throw new Exception(message);
-//	        }
 		return res;
 	}
 
 	// Converting Jsonresponse to JsonArray//
 	public JSONArray convertJsonResponseToJsonArray(String res) throws Exception {
-		JSONObject json_res = new JSONObject(res.toString());
-		String responseCode = json_res.getString("code");
-		String responseResult = json_res.getString("result");
-
-		if (Integer.parseInt(responseCode) == 0 && responseResult != null) {
-			JSONArray jsonArray = json_res.getJSONArray("result");
-			return jsonArray;
-		} else if (Integer.parseInt(responseCode) == 0 && responseResult == null) {
-			return null;
-		} else {
-			throw new Exception("Api failed with error: " + responseCode);
+		JSONObject obj = new JSONObject(res);
+		String responseCode = obj.getString("code");
+		if (Integer.parseInt(responseCode) != 0) {
+			String responseMessage = obj.getString("message");
+			throw new JimiException(responseMessage);
 		}
-	}
+		JSONArray arr = null;
+		if (obj.getString("result") != null) {
+			arr = obj.getJSONArray("result");
+		}
 
-	public String convert_IST_To_GMT(String timeEnteredByuser) throws ParseException {
-		// System.out.println("timeEnteredbyuser : " + timeEnteredByuser);
-
-		DateFormat istDateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-		istDateFormat.setTimeZone(TimeZone.getTimeZone("IST"));
-
-		SimpleDateFormat gmtDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		gmtDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-
-		Date date = istDateFormat.parse(timeEnteredByuser);
-
-		return gmtDateFormat.format(date);
+		if (Integer.parseInt(responseCode) == 0 && arr.length() == 0) {
+			throw new JimiException("Response is Empty from jimi");
+		}
+		return arr;
 	}
 
 	public historyData getGpsApiDataUsingImei(String imeis) throws Exception {
@@ -215,8 +196,8 @@ public class getDataFromJimi {
 		allRequiredParams.put("timestamp", gmtDateFormat.format(new Date()));
 		allRequiredParams.put("access_token", access_token);
 		allRequiredParams.put("imei", imei);
-		allRequiredParams.put("begin_time", convert_IST_To_GMT(startTime));
-		allRequiredParams.put("end_time", convert_IST_To_GMT(endTime));
+		allRequiredParams.put("begin_time", resUtils.convert_IST_To_GMT(startTime));
+		allRequiredParams.put("end_time", resUtils.convert_IST_To_GMT(endTime));
 		allRequiredParams.putAll(commonParams);
 		String res = getJsonResponse(allRequiredParams, url_location);
 		JSONArray jsonArray = convertJsonResponseToJsonArray(res);
@@ -267,8 +248,8 @@ public class getDataFromJimi {
 		allRequiredParams.put("timestamp", gmtDateFormat.format(new Date()));
 		allRequiredParams.put("access_token", access_token);
 		allRequiredParams.put("imei", imei);
-		allRequiredParams.put("begin_time", convert_IST_To_GMT(startTime));
-		allRequiredParams.put("end_time", convert_IST_To_GMT(endTime));
+		allRequiredParams.put("begin_time", resUtils.convert_IST_To_GMT(startTime));
+		allRequiredParams.put("end_time", resUtils.convert_IST_To_GMT(endTime));
 		allRequiredParams.putAll(commonParams);
 
 		String res = getJsonResponse(allRequiredParams, url_location);
@@ -279,11 +260,9 @@ public class getDataFromJimi {
 		System.out.println("timeElapsedForJimiApiCalls is : " + timeElapsedForJimiApiCalls);
 
 		JSONArray jsonArray = convertJsonResponseToJsonArray(res);
-		if (jsonArray == null || jsonArray.length() == 0) {
-			throw new JimiException("EmptyResponse");
-		}
 
 		List<RouteHistoryModel> list = new ArrayList<RouteHistoryModel>();
+		double TotalDistanceCovered = 0;
 
 		int i = 0;
 		while (i < jsonArray.length()) {
@@ -331,8 +310,10 @@ public class getDataFromJimi {
 						routeHistoryObj.getEndTime());
 
 				distanceCovered = Math.floor(distanceCovered * 100) / 100; // truncate to 2 decimal places
+				TotalDistanceCovered = TotalDistanceCovered + distanceCovered;
 				routeHistoryObj.setDistanceCovered(distanceCovered);
 				routeHistoryObj.setDuration(durationObj.toString());
+				routeHistoryObj.setTotalDistanceCovered(TotalDistanceCovered);
 
 				list.add(routeHistoryObj);
 
@@ -367,6 +348,7 @@ public class getDataFromJimi {
 		long timeEnd = System.currentTimeMillis();
 		long totalTimeElapsed = timeEnd - timeStart;
 		System.out.println("TotalTimeElapsed is : " + totalTimeElapsed);
+		Collections.reverse(list);
 		return list;
 	}
 
