@@ -31,6 +31,7 @@ import com.spring.gpsApiData.model.IgnitionOffPostRequest;
 import com.spring.gpsApiData.model.JimiException;
 import com.spring.gpsApiData.model.RelaySendCommandResponse;
 import com.spring.gpsApiData.model.RouteHistoryModel;
+import com.spring.gpsApiData.model.RouteHistoryWithTotalDistanceModel;
 import com.spring.gpsApiData.model.StoppagesListModel;
 import com.spring.gpsApiData.model.duration;
 
@@ -40,49 +41,96 @@ public class getDataFromJimi {
 	@Autowired
 	JimiApiresponseUtils resUtils;
 
-	private static Map<String, String> commonParams = Map.ofEntries(
-			entry("app_key", "8FB345B8693CCD00E24B3F5EEE161B65"), entry("sign", "23bfa9c9590a239d9fa25628e3149f96"),
-			entry("sign_method", "md5"), entry("v", "0.9"), entry("format", "json"), entry("expires_in", "7200"),
-			entry("target", "liveasy@97")
-//		    entry("user_id", "liveasy@97"),
-//		    entry("user_pwd_md5", "cc120882480fd847d5a092a2d9817e75")
-	);
-
 	@Value("${ACCESS_TOKEN_URL}")
 	private String accessTokenUrl;
 
 	@Value("${JIMI_URL}")
 	private String jimiUrl;
 
-	public String getAccessTokenFromJimi() throws Exception {
-		String access_token = "";
-		while (access_token == "") {
-			URL obj = new URL(accessTokenUrl);
-			HttpURLConnection httpURLConnection = (HttpURLConnection) obj.openConnection();
-			httpURLConnection.setRequestMethod("GET");
-			int responseCode = httpURLConnection.getResponseCode();
-			System.out.println("Response Code : " + responseCode);
-			if (responseCode == 200) {
-				BufferedReader in = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
-				String inputLine;
-				StringBuffer response = new StringBuffer();
-				while ((inputLine = in.readLine()) != null) {
-					response.append(inputLine);
-				}
-				in.close();
-				JSONArray res = new JSONArray(response.toString());
-				System.out.println(res);
+//	@Value("${APP_KEY}")
+//	private String appKey;
+//
+//	@Value("${USER_ID}")
+//	private String userId;
+//
+//	@Value("${USER_PWD_MD5}")
+//	private String userPwdMd5;
+//
+//	@Value("${SIGN}")
+//	private String sign;
+//
+//	@Value("${SIGN_METHOD}")
+//	private String signMethod;
+//
+//	@Value("${TARGET}")
+//	private String target;
 
-				JSONObject myResponse = new JSONObject(res.get(0).toString());
-				access_token = myResponse.getString("access_token");
-				System.out.println("access_token : " + access_token);
-			} else {
-				Thread.sleep(10 * 1000);
-				System.out.println("couldn't find any access token");
-			}
+//	private Map<String, String> commonParams = Map.ofEntries(entry("app_key", appKey), entry("sign", sign),
+//			entry("sign_method", signMethod), entry("v", "0.9"), entry("format", "json"), entry("expires_in", "7200"),
+//			entry("target", target), entry("user_id", userId), entry("user_pwd_md5", userPwdMd5));
+	private static Map<String, String> commonParams = Map.ofEntries(
+			entry("app_key", "8FB345B8693CCD00E24B3F5EEE161B65"), entry("sign", "23bfa9c9590a239d9fa25628e3149f96"),
+			entry("sign_method", "md5"), entry("v", "0.9"), entry("format", "json"), entry("expires_in", "7200"),
+			entry("target", "liveasy@97"), entry("user_id", "liveasy@97"),
+			entry("user_pwd_md5", "cc120882480fd847d5a092a2d9817e75"));
+
+	private String accessToken;
+	private long accessTokenExpiryInMillis;
+
+	public String getAccessTokenFromJimi() throws Exception {
+
+		if (accessToken == null || System.currentTimeMillis() > accessTokenExpiryInMillis) {
+			SimpleDateFormat gmtDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			gmtDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+			// Current Date Time in GMT
+			System.out.println("Current Date and Time in GMT time zone: " + gmtDateFormat.format(new Date()));
+
+			URL url_location = new URL(jimiUrl);
+			Map<String, String> allRequiredParams = new HashMap<>();
+			allRequiredParams.put("method", "jimi.oauth.token.get");
+			allRequiredParams.put("timestamp", gmtDateFormat.format(new Date()));
+			allRequiredParams.putAll(commonParams);
+			String res = getJsonResponse(allRequiredParams, url_location);
+			System.out.println("accesToken response :" + res);
+			JSONObject jsonObj = new JSONObject(res.toString());
+			JSONObject resultObj = jsonObj.getJSONObject("result");
+			accessToken = resultObj.getString("accessToken");
+			long validityDurationInSec = resultObj.getLong("expiresIn") - 10; // -10sec for expiry margin//
+			long currentTimeInMillis = System.currentTimeMillis();
+			accessTokenExpiryInMillis = (validityDurationInSec * 1000) + currentTimeInMillis;
 		}
-		return access_token;
+		return accessToken;
 	}
+
+//	public String getAccessTokenFromJimi() throws Exception {
+//		String access_token = "";
+//		while (access_token == "") {
+//			URL obj = new URL(accessTokenUrl);
+//			HttpURLConnection httpURLConnection = (HttpURLConnection) obj.openConnection();
+//			httpURLConnection.setRequestMethod("GET");
+//			int responseCode = httpURLConnection.getResponseCode();
+//			// System.out.println("Response Code : " + responseCode);
+//			if (responseCode == 200) {
+//				BufferedReader in = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+//				String inputLine;
+//				StringBuffer response = new StringBuffer();
+//				while ((inputLine = in.readLine()) != null) {
+//					response.append(inputLine);
+//				}
+//				in.close();
+//				JSONArray res = new JSONArray(response.toString());
+//				// System.out.println(res);
+//
+//				JSONObject myResponse = new JSONObject(res.get(0).toString());
+//				access_token = myResponse.getString("access_token");
+//				// System.out.println("access_token : " + access_token);
+//			} else {
+//				Thread.sleep(10 * 1000);
+//				System.out.println("couldn't find any access token");
+//			}
+//		}
+//		return access_token;
+//	}
 
 	// by giving all requiredparameters(common+private), we are getting json
 	// response//
@@ -107,12 +155,15 @@ public class getDataFromJimi {
 
 		BufferedReader in = null;
 		String res = null;
+		try {
 
-		if (conn.getResponseCode() == 200) {
-			in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
-
-		} else {
-			in = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "UTF-8"));
+			if (conn.getResponseCode() == 200) {
+				in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+			} else {
+				in = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "UTF-8"));
+			}
+		} catch (Exception e) {
+			throw new JimiException("Make Sure you have given all request parameters");
 		}
 
 		StringBuilder sb = new StringBuilder();
@@ -231,7 +282,8 @@ public class getDataFromJimi {
 
 	}
 
-	public List<RouteHistoryModel> routeHistory(String imei, String startTime, String endTime) throws Exception {
+	public RouteHistoryWithTotalDistanceModel routeHistory(String imei, String startTime, String endTime)
+			throws Exception {
 
 		long timeStart = System.currentTimeMillis();
 
@@ -261,8 +313,10 @@ public class getDataFromJimi {
 
 		JSONArray jsonArray = convertJsonResponseToJsonArray(res);
 
+		RouteHistoryWithTotalDistanceModel routeHistoryWithTotalDistance = new RouteHistoryWithTotalDistanceModel();
+
 		List<RouteHistoryModel> list = new ArrayList<RouteHistoryModel>();
-		double TotalDistanceCovered = 0;
+		double totalDistanceCovered = 0;
 
 		int i = 0;
 		while (i < jsonArray.length()) {
@@ -310,11 +364,10 @@ public class getDataFromJimi {
 						routeHistoryObj.getEndTime());
 
 				distanceCovered = Math.floor(distanceCovered * 100) / 100; // truncate to 2 decimal places
-				TotalDistanceCovered = TotalDistanceCovered + distanceCovered;
 				routeHistoryObj.setDistanceCovered(distanceCovered);
 				routeHistoryObj.setDuration(durationObj.toString());
-				routeHistoryObj.setTotalDistanceCovered(TotalDistanceCovered);
 
+				totalDistanceCovered = totalDistanceCovered + distanceCovered;
 				list.add(routeHistoryObj);
 
 			} else if (Float.parseFloat(obj.getString("gpsSpeed")) <= 2) {
@@ -349,7 +402,9 @@ public class getDataFromJimi {
 		long totalTimeElapsed = timeEnd - timeStart;
 		System.out.println("TotalTimeElapsed is : " + totalTimeElapsed);
 		Collections.reverse(list);
-		return list;
+		routeHistoryWithTotalDistance.setRouteHistoryList(list);
+		routeHistoryWithTotalDistance.setTotalDistanceCovered(totalDistanceCovered);
+		return routeHistoryWithTotalDistance;
 	}
 
 	// This is for locationbyimei strttime endtime params ...stoppageslist //
