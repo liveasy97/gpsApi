@@ -1,29 +1,35 @@
 package com.spring.gpsApiData.controller;
-import java.util.List;
 
-import com.spring.gpsApiData.entities.historyData;
-import com.spring.gpsApiData.model.CreateGeoFencePostRequest;
-import com.spring.gpsApiData.model.CreateGeoFenceResponse;
-import com.spring.gpsApiData.model.DeviceTrackListAndStoppagesListResponse;
-import com.spring.gpsApiData.model.DeviceTrackListModel;
-import com.spring.gpsApiData.model.IgnitionOffPostRequest;
-import com.spring.gpsApiData.model.JimiException;
-import com.spring.gpsApiData.model.RelaySendCommandResponse;
-import com.spring.gpsApiData.model.RouteHistoryModel;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MissingServletRequestParameterException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.spring.gpsApiData.entities.historyData;
+import com.spring.gpsApiData.model.CreateGeoFencePostRequest;
+import com.spring.gpsApiData.model.CreateGeoFenceResponse;
+import com.spring.gpsApiData.model.DeviceTrackListAndStoppagesListResponse;
+import com.spring.gpsApiData.model.IgnitionOffPostRequest;
+import com.spring.gpsApiData.model.JimiException;
+import com.spring.gpsApiData.model.RelaySendCommandResponse;
+import com.spring.gpsApiData.model.RouteHistoryWithTotalDistanceModel;
 import com.spring.gpsApiData.service.GpsDataService;
 
 @RestController
 public class Controller {
-	
+
 	@Autowired
 	private GpsDataService gpsdataService;
-	
+
 	@GetMapping("/locationbyimei/{imei}")
 	private List<historyData> getGpsData(@PathVariable String imei) throws Exception {
 		return gpsdataService.getgpsDataWithoutSaving(imei);
@@ -31,10 +37,10 @@ public class Controller {
 
 	@GetMapping("/locationbyimei")
 	public ResponseEntity<DeviceTrackListAndStoppagesListResponse> getHistoryData(
-			@RequestParam(required = false) String startTime,
-			@RequestParam(required = false) String endTime,
+			@RequestParam(required = false) String startTime, @RequestParam(required = false) String endTime,
 			@RequestParam(required = true) String imei) throws Exception {
-		return new ResponseEntity<>(gpsdataService.getHistoryDataDirectFromJimi(imei, startTime, endTime) , HttpStatus.OK);
+		return new ResponseEntity<>(gpsdataService.getHistoryDataDirectFromJimi(imei, startTime, endTime),
+				HttpStatus.OK);
 	}
 
 //	@PostMapping("/locationbyimei")
@@ -52,56 +58,55 @@ public class Controller {
 	@PostMapping("/addimei")
 	private ResponseEntity<String> addImei(@RequestBody String imei) {
 		try {
-			
+
 			gpsdataService.addImei(imei);
-		}
-		catch(Exception e) {
-	
+		} catch (Exception e) {
+
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
-		
+
 		return new ResponseEntity<>("Added Imei Successfully", HttpStatus.OK);
 	}
-	
+
 	@PostMapping("/ignitionoff")
-	private ResponseEntity<RelaySendCommandResponse> sendInstructionToDevice(@RequestBody IgnitionOffPostRequest ignitionOffPostRequest) throws Exception {
-				
-			RelaySendCommandResponse responseFromJimi = gpsdataService.commandToDevice(ignitionOffPostRequest);
-			if(responseFromJimi.getCode()==12005 || responseFromJimi.getCode()==0 )
-			{
-				
-				return new ResponseEntity<>(responseFromJimi, HttpStatus.OK);
-			}
-		    
-		    return new ResponseEntity<>(responseFromJimi, HttpStatus.BAD_REQUEST);
-	}
-	
-	@PostMapping("/creategeofence")
-	private ResponseEntity<CreateGeoFenceResponse> createGeoFenceforImei(@RequestBody CreateGeoFencePostRequest createGeoFencePostRequest) throws Exception {
-				
-		CreateGeoFenceResponse responseFromJimi = gpsdataService.createGeoFence(createGeoFencePostRequest);
-		if(responseFromJimi.getCode()==12003 || responseFromJimi.getCode()==0 )
-		{
-			
+	private ResponseEntity<RelaySendCommandResponse> sendInstructionToDevice(
+			@RequestBody IgnitionOffPostRequest ignitionOffPostRequest) throws Exception {
+
+		RelaySendCommandResponse responseFromJimi = gpsdataService.commandToDevice(ignitionOffPostRequest);
+		if (responseFromJimi.getCode() == 12005 || responseFromJimi.getCode() == 0) {
+
 			return new ResponseEntity<>(responseFromJimi, HttpStatus.OK);
 		}
-	    
-	    return new ResponseEntity<>(responseFromJimi, HttpStatus.BAD_REQUEST);
+
+		return new ResponseEntity<>(responseFromJimi, HttpStatus.BAD_REQUEST);
 	}
-	
+
+	@PostMapping("/creategeofence")
+	private ResponseEntity<CreateGeoFenceResponse> createGeoFenceforImei(
+			@RequestBody CreateGeoFencePostRequest createGeoFencePostRequest) throws Exception {
+
+		CreateGeoFenceResponse responseFromJimi = gpsdataService.createGeoFence(createGeoFencePostRequest);
+		if (responseFromJimi.getCode() == 12003 || responseFromJimi.getCode() == 0) {
+
+			return new ResponseEntity<>(responseFromJimi, HttpStatus.OK);
+		}
+
+		return new ResponseEntity<>(responseFromJimi, HttpStatus.BAD_REQUEST);
+	}
+
 	@GetMapping("/routehistory")
-	public ResponseEntity<List<RouteHistoryModel>> routeHistory(
-			@RequestParam(required = false) String startTime,
-			@RequestParam(required = false) String endTime,
+	public ResponseEntity<RouteHistoryWithTotalDistanceModel> routeHistory(
+			@RequestParam(required = false) String startTime, @RequestParam(required = false) String endTime,
 			@RequestParam(required = true) String imei) throws Exception {
-		
-			return new ResponseEntity<>(gpsdataService.routeHistory(imei, startTime, endTime) , HttpStatus.OK);
+
+		return new ResponseEntity<>(gpsdataService.routeHistory(imei, startTime, endTime), HttpStatus.OK);
 	}
+
 	@ExceptionHandler(JimiException.class)
 	public ResponseEntity<String> handleJimiException(JimiException ex) {
 		return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
 	}
-	
+
 	@ExceptionHandler(MissingServletRequestParameterException.class)
 	public ResponseEntity<String> handleMissingParams(MissingServletRequestParameterException ex) {
 		String name = ex.getParameterName();
