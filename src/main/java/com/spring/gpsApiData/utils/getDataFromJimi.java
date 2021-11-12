@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
+import javax.annotation.PostConstruct;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,90 +49,62 @@ public class getDataFromJimi {
 	@Value("${JIMI_URL}")
 	private String jimiUrl;
 
-//	@Value("${APP_KEY}")
-//	private String appKey;
-//
-//	@Value("${USER_ID}")
-//	private String userId;
-//
-//	@Value("${USER_PWD_MD5}")
-//	private String userPwdMd5;
-//
-//	@Value("${SIGN}")
-//	private String sign;
-//
-//	@Value("${SIGN_METHOD}")
-//	private String signMethod;
-//
-//	@Value("${TARGET}")
-//	private String target;
+	@Value("${APP_KEY}")
+	private String appKey;
 
-//	private Map<String, String> commonParams = Map.ofEntries(entry("app_key", appKey), entry("sign", sign),
-//			entry("sign_method", signMethod), entry("v", "0.9"), entry("format", "json"), entry("expires_in", "7200"),
-//			entry("target", target), entry("user_id", userId), entry("user_pwd_md5", userPwdMd5));
-	private static Map<String, String> commonParams = Map.ofEntries(
-			entry("app_key", "8FB345B8693CCD00E24B3F5EEE161B65"), entry("sign", "23bfa9c9590a239d9fa25628e3149f96"),
-			entry("sign_method", "md5"), entry("v", "0.9"), entry("format", "json"), entry("expires_in", "7200"),
-			entry("target", "liveasy@97"), entry("user_id", "liveasy@97"),
-			entry("user_pwd_md5", "cc120882480fd847d5a092a2d9817e75"));
+	@Value("${USER_ID}")
+	private String userId;
 
-	private String accessToken;
-	private long accessTokenExpiryInMillis;
+	@Value("${USER_PWD_MD5}")
+	private String userPwdMd5;
 
-	public String getAccessTokenFromJimi() throws Exception {
+	@Value("${SIGN}")
+	private String sign;
 
-		if (accessToken == null || System.currentTimeMillis() > accessTokenExpiryInMillis) {
-			SimpleDateFormat gmtDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			gmtDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-			// Current Date Time in GMT
-			System.out.println("Current Date and Time in GMT time zone: " + gmtDateFormat.format(new Date()));
+	@Value("${SIGN_METHOD}")
+	private String signMethod;
 
-			URL url_location = new URL(jimiUrl);
-			Map<String, String> allRequiredParams = new HashMap<>();
-			allRequiredParams.put("method", "jimi.oauth.token.get");
-			allRequiredParams.put("timestamp", gmtDateFormat.format(new Date()));
-			allRequiredParams.putAll(commonParams);
-			String res = getJsonResponse(allRequiredParams, url_location);
-			System.out.println("accesToken response :" + res);
-			JSONObject jsonObj = new JSONObject(res.toString());
-			JSONObject resultObj = jsonObj.getJSONObject("result");
-			accessToken = resultObj.getString("accessToken");
-			long validityDurationInSec = resultObj.getLong("expiresIn") - 10; // -10sec for expiry margin//
-			long currentTimeInMillis = System.currentTimeMillis();
-			accessTokenExpiryInMillis = (validityDurationInSec * 1000) + currentTimeInMillis;
-		}
-		return accessToken;
+	@Value("${TARGET}")
+	private String target;
+
+	private Map<String, String> commonParams = null;
+
+	@PostConstruct
+	public void intialise() {
+		commonParams = Map.ofEntries(entry("app_key", appKey), entry("sign", sign), entry("sign_method", signMethod),
+				entry("v", "0.9"), entry("format", "json"), entry("expires_in", "7200"), entry("target", target),
+				entry("user_id", userId), entry("user_pwd_md5", userPwdMd5));
 	}
 
-//	public String getAccessTokenFromJimi() throws Exception {
-//		String access_token = "";
-//		while (access_token == "") {
-//			URL obj = new URL(accessTokenUrl);
-//			HttpURLConnection httpURLConnection = (HttpURLConnection) obj.openConnection();
-//			httpURLConnection.setRequestMethod("GET");
-//			int responseCode = httpURLConnection.getResponseCode();
-//			// System.out.println("Response Code : " + responseCode);
-//			if (responseCode == 200) {
-//				BufferedReader in = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
-//				String inputLine;
-//				StringBuffer response = new StringBuffer();
-//				while ((inputLine = in.readLine()) != null) {
-//					response.append(inputLine);
-//				}
-//				in.close();
-//				JSONArray res = new JSONArray(response.toString());
-//				// System.out.println(res);
-//
-//				JSONObject myResponse = new JSONObject(res.get(0).toString());
-//				access_token = myResponse.getString("access_token");
-//				// System.out.println("access_token : " + access_token);
-//			} else {
-//				Thread.sleep(10 * 1000);
-//				System.out.println("couldn't find any access token");
-//			}
-//		}
-//		return access_token;
-//	}
+	public String getAccessTokenFromJimi() throws Exception {
+		String access_token = "";
+		while (access_token == "") {
+			URL obj = new URL(accessTokenUrl);
+			HttpURLConnection httpURLConnection = (HttpURLConnection) obj.openConnection();
+			httpURLConnection.setRequestMethod("GET");
+			int responseCode = httpURLConnection.getResponseCode();
+			// System.out.println("Response Code : " + responseCode);
+			if (responseCode == 200) {
+				BufferedReader in = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+				String inputLine;
+				StringBuffer response = new StringBuffer();
+				while ((inputLine = in.readLine()) != null) {
+					response.append(inputLine);
+				}
+				in.close();
+				JSONArray res = new JSONArray(response.toString());
+				// System.out.println(res);
+
+				JSONObject myResponse = new JSONObject(res.get(0).toString());
+				access_token = myResponse.getString("access_token");
+				// System.out.println("access_token : " + access_token);
+			} else {
+				Thread.sleep(10 * 1000);
+				System.out.println("couldn't find any access token");
+			}
+		}
+		return access_token;
+	}
 
 	// by giving all requiredparameters(common+private), we are getting json
 	// response//
@@ -317,13 +291,13 @@ public class getDataFromJimi {
 
 		List<RouteHistoryModel> list = new ArrayList<RouteHistoryModel>();
 		double totalDistanceCovered = 0;
+		double distanceCovered = 0;
 
 		int i = 0;
 		while (i < jsonArray.length()) {
 
 			JSONObject obj = (JSONObject) jsonArray.get(i);
 			RouteHistoryModel routeHistoryObj = new RouteHistoryModel();
-			double distanceCovered = 0;
 			double lat1 = 0, lat2 = 0, lng1 = 0, lng2 = 0;
 
 			if (Float.parseFloat(obj.getString("gpsSpeed")) > 2) {
@@ -335,7 +309,7 @@ public class getDataFromJimi {
 				int j = i + 1;
 				lat2 = ((JSONObject) jsonArray.get(j + 1)).getDouble("lat");
 				lng2 = ((JSONObject) jsonArray.get(j + 1)).getDouble("lng");
-				distanceCovered = distanceCovered + resUtils.distance(lat1, lng1, lat2, lng2);
+				distanceCovered = Double.sum(distanceCovered, resUtils.distance(lat1, lng1, lat2, lng2));
 
 				while (j < jsonArray.length()
 						&& Float.parseFloat(((JSONObject) jsonArray.get(j)).getString("gpsSpeed")) > 2) {
@@ -345,7 +319,8 @@ public class getDataFromJimi {
 						lat2 = ((JSONObject) jsonArray.get(j + 1)).getDouble("lat");
 						lng2 = ((JSONObject) jsonArray.get(j + 1)).getDouble("lng");
 					}
-					distanceCovered = distanceCovered + resUtils.distance(lat1, lng1, lat2, lng2);
+
+					distanceCovered = Double.sum(distanceCovered, resUtils.distance(lat1, lng1, lat2, lng2));
 
 					j++;
 				}
@@ -364,11 +339,15 @@ public class getDataFromJimi {
 						routeHistoryObj.getEndTime());
 
 				distanceCovered = Math.floor(distanceCovered * 100) / 100; // truncate to 2 decimal places
+
 				routeHistoryObj.setDistanceCovered(distanceCovered);
 				routeHistoryObj.setDuration(durationObj.toString());
 
 				totalDistanceCovered = totalDistanceCovered + distanceCovered;
+				totalDistanceCovered = Math.floor(totalDistanceCovered * 100) / 100;
+
 				list.add(routeHistoryObj);
+				distanceCovered = 0;
 
 			} else if (Float.parseFloat(obj.getString("gpsSpeed")) <= 2) {
 				routeHistoryObj.setTruckStatus("stopped");
