@@ -21,8 +21,9 @@ public class JimiApiresponseUtils {
 		dist = rad2deg(dist);
 		dist = dist * 60 * 1.1515;
 		dist = (dist / 0.62137); // miles to kms
-		// dist = Math.floor(dist*100)/100; // truncate to 2 decimal places
-
+		if (Double.isNaN(dist)) {
+			return 0;
+		}
 		return dist;
 	}
 
