@@ -411,16 +411,16 @@ public class getDataFromJimi {
 				} else {
 					stoppageObj.setEndTime(deviceTrackDataList.get(i - 1).getGpsTime());
 				}
-				duration durationObj = resUtils.findDuration(stoppageObj.getStartTime(), stoppageObj.getEndTime());
-				stoppageObj.setDuration(durationObj.toString());
 				if (i == deviceTrackDataList.size()) {
 
 					stoppageObj.setEndTime(resUtils.convert_DateToString(new Date()));
 				}
+				duration durationObj = resUtils.findDuration(stoppageObj.getStartTime(), stoppageObj.getEndTime());
 				if (durationObj.getDays() == 0 && durationObj.getHours() == 0 && durationObj.getMinutes() == 0
 						&& durationObj.getSeconds() != 0) {
 					continue;
 				} else {
+					stoppageObj.setDuration(durationObj.toString());
 					stoppagesList.add(stoppageObj);
 				}
 			}
