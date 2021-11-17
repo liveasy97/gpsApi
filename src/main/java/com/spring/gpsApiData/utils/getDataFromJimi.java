@@ -413,7 +413,13 @@ public class getDataFromJimi {
 				}
 				duration durationObj = resUtils.findDuration(stoppageObj.getStartTime(), stoppageObj.getEndTime());
 				stoppageObj.setDuration(durationObj.toString());
-				stoppagesList.add(stoppageObj);
+				if (i == deviceTrackDataList.size()) {
+
+					stoppageObj.setEndTime(resUtils.convert_DateToString(new Date()));
+				}
+				if (durationObj.getMinutes() != 0) {
+					stoppagesList.add(stoppageObj);
+				}
 			}
 		}
 		return stoppagesList;

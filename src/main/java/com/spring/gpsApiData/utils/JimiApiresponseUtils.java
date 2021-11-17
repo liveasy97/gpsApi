@@ -35,6 +35,12 @@ public class JimiApiresponseUtils {
 		return (rad * 180.0 / Math.PI);
 	}
 
+	public String convert_DateToString(Date date) {
+		DateFormat istDateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+		istDateFormat.setTimeZone(TimeZone.getTimeZone("IST"));
+		return istDateFormat.format(date);
+	}
+
 	public String convert_GMT_To_IST(String gpstime) throws ParseException {
 		DateFormat istDateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 		istDateFormat.setTimeZone(TimeZone.getTimeZone("IST"));
