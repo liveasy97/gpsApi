@@ -417,7 +417,10 @@ public class getDataFromJimi {
 
 					stoppageObj.setEndTime(resUtils.convert_DateToString(new Date()));
 				}
-				if (durationObj.getMinutes() != 0) {
+				if (durationObj.getDays() == 0 && durationObj.getHours() == 0 && durationObj.getMinutes() == 0
+						&& durationObj.getSeconds() != 0) {
+					continue;
+				} else {
 					stoppagesList.add(stoppageObj);
 				}
 			}
