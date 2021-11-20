@@ -23,4 +23,9 @@ public class historyData {
     private String direction;
     private String timeStamp;
     private String gpsTime;
+    private String hbTime;
+    private String accStatus;
+    private String activationFlag;
+    private String expireFlag;
+    private String electQuantity;
 }
