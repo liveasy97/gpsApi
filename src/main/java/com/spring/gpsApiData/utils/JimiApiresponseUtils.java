@@ -21,9 +21,8 @@ public class JimiApiresponseUtils {
 		dist = rad2deg(dist);
 		dist = dist * 60 * 1.1515;
 		dist = (dist / 0.62137); // miles to kms
-		if (Double.isNaN(dist)) {
-			return 0;
-		}
+		// dist = Math.floor(dist*100)/100; // truncate to 2 decimal places
+
 		return dist;
 	}
 
@@ -33,12 +32,6 @@ public class JimiApiresponseUtils {
 
 	public double rad2deg(double rad) {
 		return (rad * 180.0 / Math.PI);
-	}
-
-	public String convert_DateToString(Date date) {
-		DateFormat istDateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-		istDateFormat.setTimeZone(TimeZone.getTimeZone("IST"));
-		return istDateFormat.format(date);
 	}
 
 	public String convert_GMT_To_IST(String gpstime) throws ParseException {
