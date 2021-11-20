@@ -11,7 +11,8 @@ import java.util.UUID;
 @Entity
 @Table(name = "historyData")
 @Data
-public class historyData {
+public class historyData { 
+
     @Id
     private UUID id;
     private String imei;

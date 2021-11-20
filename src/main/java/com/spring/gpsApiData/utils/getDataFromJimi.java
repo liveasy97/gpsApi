@@ -395,11 +395,20 @@ public class getDataFromJimi {
 					routeHistoryObj.setEndTime(
 							resUtils.convert_GMT_To_IST(((JSONObject) jsonArray.get(i - 1)).getString("gpsTime")));
 				}
+				if (i == jsonArray.length()) {
+
+					routeHistoryObj.setEndTime(resUtils.convert_DateToString(new Date()));
+				}
 				duration durationObj = resUtils.findDuration(routeHistoryObj.getStartTime(),
 						routeHistoryObj.getEndTime());
-				routeHistoryObj.setDuration(durationObj.toString());
 
-				list.add(routeHistoryObj);
+				if (durationObj.getDays() == 0 && durationObj.getHours() == 0 && durationObj.getMinutes() == 0
+						&& durationObj.getSeconds() != 0) {
+					continue;
+				} else {
+					routeHistoryObj.setDuration(durationObj.toString());
+					list.add(routeHistoryObj);
+				}
 			}
 		}
 
