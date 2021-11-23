@@ -190,7 +190,6 @@ public class getDataFromJimi {
 			throw new Exception("Api failed with empty response");
 		}
 		JSONObject json = (JSONObject) jsonArray.get(0);
-
 		historyData gpsDataModel = new historyData();
 		gpsDataModel.setImei(json.getString("imei"));
 		gpsDataModel.setLat(json.getString("lat"));
@@ -199,6 +198,11 @@ public class getDataFromJimi {
 		gpsDataModel.setDeviceName(json.getString("deviceName"));
 		gpsDataModel.setPowerValue(json.getString("powerValue"));
 		gpsDataModel.setDirection(json.getString("direction"));
+		gpsDataModel.setHbTime(json.getString("hbTime"));
+		gpsDataModel.setAccStatus(json.getString("accStatus"));
+		gpsDataModel.setActivationFlag(json.getString("activationFlag"));
+		gpsDataModel.setExpireFlag(json.getString("expireFlag"));
+		gpsDataModel.setElectQuantity(json.getString("electQuantity"));
 		gpsDataModel.setGpsTime(resUtils.convert_GMT_To_IST(json.getString("gpsTime")));
 		System.out.println(gpsDataModel);
 		return gpsDataModel;
