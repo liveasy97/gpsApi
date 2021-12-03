@@ -1,3 +1,4 @@
+/*
 package com.spring.gpsApiData.entities;
 
 import lombok.Data;
@@ -18,4 +19,4 @@ public class RegisteredImeiData {
 	
 	private String status;
 	
-}
+}*/

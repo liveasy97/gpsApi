@@ -34,7 +34,7 @@ public class Controller {
 	private List<historyData> getGpsData(@PathVariable String imei) throws Exception {
 		return gpsdataService.getgpsDataWithoutSaving(imei);
 	}
-
+/*
 	@GetMapping("/locationbyimei")
 	public ResponseEntity<DeviceTrackListAndStoppagesListResponse> getHistoryData(
 			@RequestParam(required = false) String startTime, @RequestParam(required = false) String endTime,
@@ -113,4 +113,6 @@ public class Controller {
 		System.out.println(name + " parameter is missing");
 		return new ResponseEntity<>(name + " parameter is missing", HttpStatus.BAD_REQUEST);
 	}
+
+ */
 }

@@ -5,14 +5,14 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [ main ]
+    branches: [ dev ]
 defaults:
  run:
   working-directory: ./
 jobs:
   build:
 
-    runs-on: ['self-hosted', 'Linux', 'X64',main]
+    runs-on: ['self-hosted', 'Linux', 'X64']
 
     steps:
     - uses: actions/checkout@v2
