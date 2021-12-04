@@ -1,8 +1,7 @@
 package com.spring.gpsApiData.service;
 
-import java.util.List;
-
-import com.spring.gpsApiData.entities.historyData;
+import java.util.stream.Stream;
+;
 //import com.spring.gpsApiData.model.CreateGeoFencePostRequest;
 //import com.spring.gpsApiData.model.CreateGeoFenceResponse;
 //import com.spring.gpsApiData.model.DeviceTrackListAndStoppagesListResponse;
@@ -14,7 +13,7 @@ public interface GpsDataService {
 
 //	public List<historyData> getgpsDataWithSaving(String imei) throws Exception;
 
-	public List<historyData> getgpsDataWithoutSaving(String imei) throws Exception;
+	public Stream<Object> getgpsDataWithoutSaving(String imei) throws Exception;
 
 /*	public String savegpsData(gpsData data);
 

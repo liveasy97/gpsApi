@@ -10,7 +10,6 @@ import java.sql.Timestamp;
 @Data
 public class DeviceData {
     @Id
-    @GeneratedValue
     private int id;
     private String name;
     private String uniqueid;
@@ -23,6 +22,5 @@ public class DeviceData {
     private String contact;
     private String category;
     private int disabled;
-
 
 }

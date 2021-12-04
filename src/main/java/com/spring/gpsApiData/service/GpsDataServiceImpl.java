@@ -1,10 +1,7 @@
 package com.spring.gpsApiData.service;
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Stream;
 
 import com.spring.gpsApiData.dao.DeviceDataDao;
 import com.spring.gpsApiData.dao.TraccarDataDao;
@@ -18,12 +15,6 @@ import org.springframework.stereotype.Service;
 
 
 import com.spring.gpsApiData.entities.historyData;
-import com.spring.gpsApiData.model.CreateGeoFencePostRequest;
-import com.spring.gpsApiData.model.CreateGeoFenceResponse;
-import com.spring.gpsApiData.model.DeviceTrackListAndStoppagesListResponse;
-import com.spring.gpsApiData.model.IgnitionOffPostRequest;
-import com.spring.gpsApiData.model.RelaySendCommandResponse;
-import com.spring.gpsApiData.model.RouteHistoryWithTotalDistanceModel;
 
 @Service
 public class GpsDataServiceImpl implements GpsDataService {
@@ -57,68 +48,63 @@ public class GpsDataServiceImpl implements GpsDataService {
 */
 
 	@Override
-	public List<historyData> getgpsDataWithoutSaving(String imei) throws Exception {
-		List<historyData> resultF = new ArrayList<>();
-		DeviceData device= deviceDataDao.findByImei(imei);
-//		for logging
-		System.out.println(device.getUniqueid()+" "+device.getId());
-//
-//		List<TraccarData> result = dao.findById(device.getId());
-// 		for logging
+	public Stream<Object> getgpsDataWithoutSaving(String imei) throws Exception {
 
-//		result.stream().map((x)->{
-//			historyData d = new historyData();
-//			d.setId(UUID.randomUUID());
-//			d.setImei(String.valueOf(device.getUniqueid()));
-//			d.setLat(String.valueOf(x.getLatitude()));
-//			d.setLng(String.valueOf(x.getLongitude()));
-//			d.setDeviceName(device.getName());
-//			d.setDirection(String.valueOf(x.getCourse()));
-//			d.setHbTime(null);
-//			d.setSpeed(String.valueOf(x.getSpeed()));
-//			d.setGpsTime(x.getDevicetime().toString());
-//			d.setPowerValue(null);
-//			d.setTimeStamp(x.getServertime().toString());
-//			System.out.println(d.getDeviceName()+"\t"+"traccardata \n");
-//			resultF.add(d);
-//			return 0;
-//		});
-//		return resultF;
+		DeviceData device = deviceDataDao.findByImei(imei);
 
-//		System.out.println("\t imei is - "+device.getUniqueid()+"\n");
-////
-		List<TraccarData> result = dao.findByImei(imei);
-// 		for logging
+		List<TraccarData> result = dao.findByNId(device.getId());
 
-		result.stream().map((x)->{
+
+		Stream<Object> resultF = result.stream().map((x)->{
 			historyData d = new historyData();
 			d.setId(UUID.randomUUID());
-			d.setImei(String.valueOf(imei));
+			d.setImei(String.valueOf(device.getUniqueid()));
 			d.setLat(String.valueOf(x.getLatitude()));
 			d.setLng(String.valueOf(x.getLongitude()));
 			d.setDeviceName(device.getName());
-			//-----------------------------
-			if(x.getCourse()!= 0 )
 			d.setDirection(String.valueOf(x.getCourse()));
-			else
-				d.setDirection("0");
-			//-----------------------------
-			d.setHbTime(null);
+			d.setHbTime(x.getFixtime().toString());
 			d.setSpeed(String.valueOf(x.getSpeed()));
 			d.setGpsTime(x.getDevicetime().toString());
 			d.setPowerValue(null);
 			d.setTimeStamp(x.getServertime().toString());
-			//
-			//
-			System.out.println("\n "+d.getDeviceName()+" "+d.getDirection() +" ");
-			//
-			//
-			resultF.add(d);
-			return 0;
+			return d;
 		});
 		return resultF;
 
+
+//		Stream<Object> resultF = result.stream().map((x) -> {
+//
+//
+//
+//			historyData d = new historyData();
+//			d.setId(UUID.randomUUID());
+//			d.setImei(imei);
+//			d.setLat(String.valueOf(x.getLatitude()));
+//			d.setLng(String.valueOf(x.getLongitude()));
+//			d.setSpeed(String.valueOf(x.getSpeed()));
+//			d.setDeviceName(device.getName());
+//			d.setPowerValue(null);
+//			//-----------------------------
+//			if (x.getCourse() != 0)
+//				d.setDirection(String.valueOf(x.getCourse()));
+//			else
+//				d.setDirection("0");
+//			//-----------------------------
+//			d.setTimeStamp(x.getServertime().toString());
+//			d.setHbTime(x.getFixtime().toString());
+//			d.setGpsTime(x.getDevicetime().toString());
+//			//
+//			//
+//			//
+//			//
+//			return d;
+//
+//		});
+//
+//		return resultF;
 	}
+
 /*
 	@Override
 	public String savegpsData(gpsData data) {

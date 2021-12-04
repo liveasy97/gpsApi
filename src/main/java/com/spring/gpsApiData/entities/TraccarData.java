@@ -11,7 +11,6 @@ import java.util.Date;
 public class TraccarData {
 
         @Id
-        @GeneratedValue
         private int id;
         private String protocol;
         private int deviceid;
@@ -28,6 +27,7 @@ public class TraccarData {
         private String attributes;
         private double accuracy;
         private String network;
+
     }
 
 
