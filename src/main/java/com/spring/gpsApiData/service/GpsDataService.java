@@ -35,4 +35,7 @@ public interface GpsDataService {
 	public RouteHistoryWithTotalDistanceModel routeHistory(String imei, String startTime, String endTime)
 			throws Exception;
 
+	public DeviceTrackListAndStoppagesListResponse getHistoryDataUsingTraccar(String imei, String startTime,
+			String endTime) throws Exception;
+
 }
