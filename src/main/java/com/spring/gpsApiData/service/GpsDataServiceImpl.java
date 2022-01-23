@@ -1,28 +1,20 @@
 package com.spring.gpsApiData.service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Stream;
 
+import com.spring.gpsApiData.dao.DeviceDataDao;
+import com.spring.gpsApiData.dao.TraccarDataDao;
+import com.spring.gpsApiData.entities.DeviceData;
+import com.spring.gpsApiData.entities.TraccarData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.spring.gpsApiData.constants.Constants.Status;
-import com.spring.gpsApiData.dao.RegisteredImeiDataDao;
-import com.spring.gpsApiData.dao.historyDataDao;
-import com.spring.gpsApiData.entities.RegisteredImeiData;
-import com.spring.gpsApiData.entities.gpsData;
+
+
 import com.spring.gpsApiData.entities.historyData;
-import com.spring.gpsApiData.model.CreateGeoFencePostRequest;
-import com.spring.gpsApiData.model.CreateGeoFenceResponse;
-import com.spring.gpsApiData.model.DeviceTrackListAndStoppagesListResponse;
-import com.spring.gpsApiData.model.IgnitionOffPostRequest;
-import com.spring.gpsApiData.model.RelaySendCommandResponse;
-import com.spring.gpsApiData.model.RouteHistoryWithTotalDistanceModel;
-import com.spring.gpsApiData.utils.getDataFromJimi;
 
 @Service
 public class GpsDataServiceImpl implements GpsDataService {
@@ -30,14 +22,12 @@ public class GpsDataServiceImpl implements GpsDataService {
 	private static final Logger log = LoggerFactory.getLogger(GpsDataServiceImpl.class);
 
 	@Autowired
-	private historyDataDao dao;
+	private TraccarDataDao dao;
 
 	@Autowired
-	private RegisteredImeiDataDao rdao;
+	private DeviceDataDao deviceDataDao;
 
-	@Autowired
-	private getDataFromJimi getDataFromJimi;
-
+/*
 	@Override
 	public List<historyData> getgpsDataWithSaving(String imei) throws Exception {
 		if (imei.contains("transporter") || imei.contains("shipper")) {
@@ -55,21 +45,67 @@ public class GpsDataServiceImpl implements GpsDataService {
 			return result;
 		}
 	}
+*/
 
-	// fetching data directly from jimi//
 	@Override
-	public List<historyData> getgpsDataWithoutSaving(String imei) throws Exception {
+	public Stream<Object> getgpsDataWithoutSaving(String imei) throws Exception {
 
-		historyData datafromjimi = getDataFromJimi.getGpsApiDataUsingImei(imei);
+		DeviceData device = deviceDataDao.findByImei(imei);
 
-		List<historyData> result = new ArrayList<>(Collections.emptyList());
-		if (datafromjimi != null) {
-			result.add(datafromjimi);
-		}
-		return result;
+		List<TraccarData> result = dao.findByNId(device.getId());
 
+
+		Stream<Object> resultF = result.stream().map((x)->{
+			historyData d = new historyData();
+			d.setId(UUID.randomUUID());
+			d.setImei(String.valueOf(device.getUniqueid()));
+			d.setLat(String.valueOf(x.getLatitude()));
+			d.setLng(String.valueOf(x.getLongitude()));
+			d.setDeviceName(device.getName());
+			d.setDirection(String.valueOf(x.getCourse()));
+			d.setHbTime(x.getFixtime().toString());
+			d.setSpeed(String.valueOf(x.getSpeed()));
+			d.setGpsTime(x.getDevicetime().toString());
+			d.setPowerValue(null);
+			d.setTimeStamp(x.getServertime().toString());
+			return d;
+		});
+		return resultF;
+
+
+//		Stream<Object> resultF = result.stream().map((x) -> {
+//
+//
+//
+//			historyData d = new historyData();
+//			d.setId(UUID.randomUUID());
+//			d.setImei(imei);
+//			d.setLat(String.valueOf(x.getLatitude()));
+//			d.setLng(String.valueOf(x.getLongitude()));
+//			d.setSpeed(String.valueOf(x.getSpeed()));
+//			d.setDeviceName(device.getName());
+//			d.setPowerValue(null);
+//			//-----------------------------
+//			if (x.getCourse() != 0)
+//				d.setDirection(String.valueOf(x.getCourse()));
+//			else
+//				d.setDirection("0");
+//			//-----------------------------
+//			d.setTimeStamp(x.getServertime().toString());
+//			d.setHbTime(x.getFixtime().toString());
+//			d.setGpsTime(x.getDevicetime().toString());
+//			//
+//			//
+//			//
+//			//
+//			return d;
+//
+//		});
+//
+//		return resultF;
 	}
 
+/*
 	@Override
 	public String savegpsData(gpsData data) {
 		return data.toString();
@@ -183,4 +219,6 @@ public class GpsDataServiceImpl implements GpsDataService {
 
 		return getDataFromJimi.routeHistory(imei, startTime, endTime);
 	}
+
+ */
 }

@@ -1,3 +1,4 @@
+/*
 package com.spring.gpsApiData.schedulingtasks;
 
 import java.text.SimpleDateFormat;
@@ -16,7 +17,6 @@ import com.spring.gpsApiData.dao.RegisteredImeiDataDao;
 import com.spring.gpsApiData.dao.historyDataDao;
 import com.spring.gpsApiData.entities.RegisteredImeiData;
 import com.spring.gpsApiData.entities.historyData;
-import com.spring.gpsApiData.utils.getDataFromJimi;
 
 @Component
 public class GpsDataSchedulingTasks {
@@ -29,8 +29,7 @@ public class GpsDataSchedulingTasks {
 	@Autowired
 	private historyDataDao historydatadao;
 	
-	 @Autowired
-     private getDataFromJimi getDataFromJimi;
+
 	
 	@Scheduled(fixedDelay = 10000)
     public void ImeiInfo() {
@@ -47,30 +46,7 @@ public class GpsDataSchedulingTasks {
         {
         	try
         	{
-        		log.info("Tracking GpsData for Imei:" + data.getImei());
-        		
-        		historyData gpsData = getDataFromJimi.getGpsApiDataUsingImei(data.getImei());
-                historyData historyData = new historyData();
-                historyData.setId(UUID.randomUUID());
-                historyData.setDeviceName(gpsData.getDeviceName());
-                historyData.setImei(data.getImei());
-                historyData.setLat(gpsData.getLat());
-                historyData.setLng(gpsData.getLng());
-                historyData.setPowerValue(gpsData.getPowerValue());
-                historyData.setSpeed(gpsData.getSpeed());
-                historyData.setDirection(gpsData.getDirection());
-                historyData.setGpsTime(gpsData.getGpsTime());
-                SimpleDateFormat gmtDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                gmtDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-                historyData.setTimeStamp(gmtDateFormat.format(new Date()));
-                
-                log.info("historyData : " + historyData);
-                
-                if (Integer.parseInt(gpsData.getSpeed()) > 2) {
-                	historydatadao.save(historyData);
-                } else {
-                    Thread.sleep(600 * 1000);
-                }
+
         	}
         	catch (Exception e)
         	{
@@ -79,4 +55,4 @@ public class GpsDataSchedulingTasks {
         }
 
 	}
-}
+}*/

@@ -1,3 +1,4 @@
+/*
 package com.spring.gpsApiData.entities;
 
 import lombok.Data;
@@ -22,3 +23,4 @@ public class gpsData {
 	private String gpsTime;
 
 }
+*/

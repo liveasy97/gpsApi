@@ -1,27 +1,12 @@
 package com.spring.gpsApiData.controller;
 
-import java.util.List;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MissingServletRequestParameterException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.spring.gpsApiData.entities.historyData;
-import com.spring.gpsApiData.model.CreateGeoFencePostRequest;
-import com.spring.gpsApiData.model.CreateGeoFenceResponse;
-import com.spring.gpsApiData.model.DeviceTrackListAndStoppagesListResponse;
-import com.spring.gpsApiData.model.IgnitionOffPostRequest;
-import com.spring.gpsApiData.model.JimiException;
-import com.spring.gpsApiData.model.RelaySendCommandResponse;
-import com.spring.gpsApiData.model.RouteHistoryWithTotalDistanceModel;
 import com.spring.gpsApiData.service.GpsDataService;
 
 @RestController
@@ -31,10 +16,10 @@ public class Controller {
 	private GpsDataService gpsdataService;
 
 	@GetMapping("/locationbyimei/{imei}")
-	private List<historyData> getGpsData(@PathVariable String imei) throws Exception {
+	private Stream<Object> getGpsData(@PathVariable String imei) throws Exception {
 		return gpsdataService.getgpsDataWithoutSaving(imei);
 	}
-
+/*
 	@GetMapping("/locationbyimei")
 	public ResponseEntity<DeviceTrackListAndStoppagesListResponse> getHistoryData(
 			@RequestParam(required = false) String startTime, @RequestParam(required = false) String endTime,
@@ -113,4 +98,6 @@ public class Controller {
 		System.out.println(name + " parameter is missing");
 		return new ResponseEntity<>(name + " parameter is missing", HttpStatus.BAD_REQUEST);
 	}
+
+ */
 }
